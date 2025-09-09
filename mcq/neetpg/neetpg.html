@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET PG MCQ Learner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        .incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="bg-white rounded-xl shadow-2xl p-6 md:p-10 w-full max-w-lg mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">NEET PG MCQ Learner</h1>
+        <p class="text-center text-gray-500 mb-8">Test your knowledge with these practice questions.</p>
+        
+        <div id="quiz-card" class="bg-gray-50 rounded-lg p-6 mb-6">
+            <div id="question-text" class="text-lg md:text-xl font-semibold text-gray-700 mb-4"></div>
+            <div id="options" class="space-y-4"></div>
+        </div>
+
+        <div id="feedback-card" class="hidden bg-gray-50 p-6 rounded-lg mb-6">
+            <div id="feedback-message" class="font-bold text-lg text-center mb-2"></div>
+            <div id="explanation" class="text-gray-700 text-sm"></div>
+        </div>
+
+        <div class="flex justify-center">
+            <button id="next-button" class="hidden px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-200">
+                Next Question
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Mock data to simulate questions from parsed exam papers
+        const questions = [
+            {
+                question: "Which of the following is the most common cause of acute kidney injury in children?",
+                options: ["Nephrotic syndrome", "Hemolytic uremic syndrome", "Glomerulonephritis", "Renal tubular acidosis"],
+                answer: "Hemolytic uremic syndrome",
+                explanation: "Hemolytic uremic syndrome (HUS) is a disease characterized by the triad of hemolytic anemia, thrombocytopenia, and acute kidney injury. It is the most common cause of acute kidney injury in infants and young children, often following an infection with E. coli O157:H7.",
+                isAnswered: false
+            },
+            {
+                question: "What is the primary site of action of loop diuretics?",
+                options: ["Proximal convoluted tubule", "Loop of Henle", "Distal convoluted tubule", "Collecting duct"],
+                answer: "Loop of Henle",
+                explanation: "Loop diuretics, such as Furosemide, act on the thick ascending limb of the loop of Henle to inhibit the Na+-K+-2Cl− cotransporter. This action prevents the reabsorption of sodium, potassium, and chloride, leading to increased excretion of water.",
+                isAnswered: false
+            },
+            {
+                question: "A patient presents with a 'strawberry tongue' and a sandpaper-like rash. Which organism is the likely cause?",
+                options: ["Streptococcus pyogenes", "Staphylococcus aureus", "Neisseria meningitidis", "Haemophilus influenzae"],
+                answer: "Streptococcus pyogenes",
+                explanation: "Scarlet fever is caused by an erythrogenic toxin-producing strain of Streptococcus pyogenes. The characteristic clinical findings are a diffuse erythematous 'sandpaper-like' rash and a 'strawberry tongue', where the papillae are red and edematous.",
+                isAnswered: false
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        const quizCard = document.getElementById('quiz-card');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options');
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const explanationText = document.getElementById('explanation');
+        const nextButton = document.getElementById('next-button');
+
+        function loadQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+            
+            // Hide feedback and next button
+            feedbackCard.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full px-4 py-3 text-left rounded-lg border-2 border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200 cursor-pointer text-sm md:text-base';
+                button.onclick = () => selectOption(button, option, currentQuestion);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectOption(selectedButton, selectedOption, currentQuestion) {
+            if (currentQuestion.isAnswered) return;
+
+            currentQuestion.isAnswered = true;
+            const allOptions = optionsContainer.querySelectorAll('button');
+
+            allOptions.forEach(button => {
+                if (button.textContent === currentQuestion.answer) {
+                    button.classList.add('correct');
+                    button.classList.remove('border-gray-200');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('incorrect');
+                    button.classList.remove('border-gray-200');
+                }
+                button.classList.remove('hover:bg-gray-100', 'cursor-pointer');
+                button.disabled = true;
+            });
+            
+            // Show feedback
+            feedbackCard.classList.remove('hidden');
+            if (selectedOption === currentQuestion.answer) {
+                feedbackMessage.textContent = "Correct! Great job!";
+                feedbackMessage.className = "font-bold text-lg text-center mb-2 text-green-600";
+            } else {
+                feedbackMessage.textContent = "Incorrect. Let's review the correct answer.";
+                feedbackMessage.className = "font-bold text-lg text-center mb-2 text-red-600";
+            }
+            explanationText.textContent = currentQuestion.explanation;
+
+            nextButton.classList.remove('hidden');
+        }
+
+        nextButton.onclick = () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                // End of quiz or loop back
+                alert("You have completed all the questions!");
+                currentQuestionIndex = 0;
+                questions.forEach(q => q.isAnswered = false); // Reset for replay
+                loadQuestion();
+            }
+        };
+
+        // Initial load
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>

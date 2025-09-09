@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="dashboard-header">
+            <h1><i class="fas fa-sprint"></i> Sprint Dashboard</h1>
+            <div class="header-controls">
+                <button id="add-note-btn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+                <div class="sprint-info">
+                    <span class="sprint-name">Sprint 23</span>
+                    <span class="sprint-dates">Dec 4 - Dec 18, 2024</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="team-filter">
+            <button class="filter-btn active" data-member="all">All Team</button>
+            <div id="team-filters"></div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="columns">
+                <div class="column" data-status="todo">
+                    <div class="column-header">
+                        <h3><i class="fas fa-clipboard-list"></i> To Do</h3>
+                        <span class="task-count">0</span>
+                    </div>
+                    <div class="column-content" id="todo-column"></div>
+                </div>
+
+                <div class="column" data-status="in-progress">
+                    <div class="column-header">
+                        <h3><i class="fas fa-play-circle"></i> In Progress</h3>
+                        <span class="task-count">0</span>
+                    </div>
+                    <div class="column-content" id="in-progress-column"></div>
+                </div>
+
+                <div class="column" data-status="review">
+                    <div class="column-header">
+                        <h3><i class="fas fa-eye"></i> Review</h3>
+                        <span class="task-count">0</span>
+                    </div>
+                    <div class="column-content" id="review-column"></div>
+                </div>
+
+                <div class="column" data-status="done">
+                    <div class="column-header">
+                        <h3><i class="fas fa-check-circle"></i> Done</h3>
+                        <span class="task-count">0</span>
+                    </div>
+                    <div class="column-content" id="done-column"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Note Modal -->
+    <div id="note-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Task</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="note-form">
+                <div class="form-group">
+                    <label for="task-title">Task Title *</label>
+                    <input type="text" id="task-title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="assigned-to">Assigned To *</label>
+                        <select id="assigned-to" required>
+                            <option value="">Select team member</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task-status">Status</label>
+                        <select id="task-status">
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="review">Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task-eta">ETA</label>
+                        <input type="date" id="task-eta">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jira-link">Jira Link</label>
+                        <input type="url" id="jira-link" placeholder="https://yourcompany.atlassian.net/browse/TASK-123">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bug-link">Bug Link</label>
+                        <input type="url" id="bug-link" placeholder="https://github.com/repo/issues/123">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
