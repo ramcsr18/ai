@@ -3,7 +3,7 @@ import './App.css';
 import KanbanBoard from './components/KanbanBoard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { INITIAL_TASKS, STAGES, TEAM_MEMBERS } from './data/seedData';
-import { normalizeTasks, normalizeTask } from './utils/taskUtils';
+import { canUserAccessTask, normalizeTasks, normalizeTask } from './utils/taskUtils';
 
 const TASK_STORAGE_KEY = 'sprint-manager-tasks';
 
@@ -52,7 +52,7 @@ function LoginScreen() {
     <main className="app-shell login-shell">
       <section className="hero-card">
         <p className="eyebrow">Sprint Intelligence</p>
-        <h1>Sprint Manager</h1>
+        <h1>Sprint Board</h1>
         <p className="hero-copy">
           Move sticky notes across delivery stages, triage work by priority and due date,
           and keep a dated activity trail on every task.
@@ -138,18 +138,21 @@ function LoginScreen() {
 
 function Dashboard() {
   const { user, logout } = useAuth();
+  const isAdmin = user.role === 'admin';
   const [tasks, setTasks] = useState(readStoredTasks);
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [stageFilter, setStageFilter] = useState('all');
   const [newTask, setNewTask] = useState({
     title: '',
-    assignee: TEAM_MEMBERS[0],
+    assignee: isAdmin ? TEAM_MEMBERS[0] : user.name,
     status: STAGES[0],
     effort: 8,
     start: '2026-04-20',
     end: '2026-04-24',
     squad: 'Platform',
+    release: '',
+    milestone: false,
     priority: 'Medium',
     blocked: false,
     bugUrl: '',
@@ -161,10 +164,15 @@ function Dashboard() {
     window.localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
+  const accessibleTasks = tasks.filter((task) => canUserAccessTask(user, task));
+  const availableAssignees = [...new Set(accessibleTasks.map((task) => task.assignee))];
+
   const updateTask = (taskId, patch) => {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
-        task.id === taskId ? normalizeTask({ ...task, ...patch }) : task
+        task.id === taskId && canUserAccessTask(user, task)
+          ? normalizeTask({ ...task, ...patch })
+          : task
       )
     );
   };
@@ -176,7 +184,7 @@ function Dashboard() {
   const addComment = (taskId, comment) => {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
-        task.id === taskId
+        task.id === taskId && canUserAccessTask(user, task)
           ? normalizeTask({
               ...task,
               comments: [comment, ...task.comments],
@@ -199,6 +207,8 @@ function Dashboard() {
     setTasks((currentTasks) => [
       normalizeTask({
         ...newTask,
+        assignee: isAdmin ? newTask.assignee : user.name,
+        milestone: newTask.status === 'Completed' ? newTask.milestone : false,
         title,
         effort: Number(newTask.effort),
         id: `task-${Date.now()}`,
@@ -215,7 +225,10 @@ function Dashboard() {
       effort: 8,
       blocked: false,
       status: STAGES[0],
+      release: '',
+      milestone: false,
       priority: 'Medium',
+      assignee: isAdmin ? TEAM_MEMBERS[0] : user.name,
     }));
   };
 
@@ -223,33 +236,16 @@ function Dashboard() {
     setTasks(normalizeTasks(INITIAL_TASKS));
   };
 
-  const visibleTasks = tasks.filter((task) => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-    const commentText = task.comments.map((comment) => comment.text).join(' ').toLowerCase();
-    const matchesSearch =
-      !normalizedSearchTerm ||
-      task.title.toLowerCase().includes(normalizedSearchTerm) ||
-      task.squad.toLowerCase().includes(normalizedSearchTerm) ||
-      commentText.includes(normalizedSearchTerm);
-
-    const matchesAssignee =
-      assigneeFilter === 'all' || task.assignee === assigneeFilter;
-
-    const matchesStage = stageFilter === 'all' || task.status === stageFilter;
-
-    return matchesSearch && matchesAssignee && matchesStage;
-  });
-
-  const totalEffort = tasks.reduce((sum, task) => sum + task.effort, 0);
-  const productionCount = tasks.filter((task) => task.status === 'Production').length;
-  const blockedCount = tasks.filter((task) => task.blocked).length;
+  const totalEffort = accessibleTasks.reduce((sum, task) => sum + task.effort, 0);
+  const productionCount = accessibleTasks.filter((task) => task.status === 'Production').length;
+  const blockedCount = accessibleTasks.filter((task) => task.blocked).length;
 
   return (
     <main className="app-shell">
       <header className="topbar">
         <div>
           <p className="eyebrow">Employee delivery workspace</p>
-          <h1>Sprint Manager</h1>
+          <h1>Sprint Board</h1>
           <p className="topbar-copy">
             Sticky notes can be dragged between stages, and cards stack automatically by
             priority and due date.
@@ -267,25 +263,33 @@ function Dashboard() {
       </header>
 
       <section className="summary-grid" aria-label="Sprint summary">
-        <article className="summary-card">
+        <article
+          className="summary-card"
+          title="Total tasks available to you in the current workspace."
+        >
           <p className="eyebrow">Total tasks</p>
-          <strong>{tasks.length}</strong>
-          <span>{visibleTasks.length} visible with current filters</span>
+          <strong>{accessibleTasks.length}</strong>
         </article>
-        <article className="summary-card">
+        <article
+          className="summary-card"
+          title="Total planned effort across all tasks you can access."
+        >
           <p className="eyebrow">Planned effort</p>
           <strong>{totalEffort}h</strong>
-          <span>Across all active sprint work items</span>
         </article>
-        <article className="summary-card">
+        <article
+          className="summary-card"
+          title="Tasks already delivered to production."
+        >
           <p className="eyebrow">Production ready</p>
-          <strong>{productionCount}</strong>
-          <span>Items delivered to production</span>
+          <strong className="summary-value-green">{productionCount}</strong>
         </article>
-        <article className="summary-card">
+        <article
+          className="summary-card"
+          title="Blocked tasks currently needing attention."
+        >
           <p className="eyebrow">Risks</p>
-          <strong>{blockedCount}</strong>
-          <span>Blocked items needing attention</span>
+          <strong className="summary-value-red">{blockedCount}</strong>
         </article>
       </section>
 
@@ -310,7 +314,7 @@ function Dashboard() {
               onChange={(event) => setAssigneeFilter(event.target.value)}
             >
               <option value="all">All owners</option>
-              {TEAM_MEMBERS.map((member) => (
+              {availableAssignees.map((member) => (
                 <option key={member} value={member}>
                   {member}
                 </option>
@@ -319,6 +323,7 @@ function Dashboard() {
           </div>
 
           <div className="toolbar-field">
+            <label htmlFor="stage">Stage</label>
             <select
               id="stage"
               value={stageFilter}
@@ -337,45 +342,49 @@ function Dashboard() {
 
           <div className="toolbar-actions">
             <button type="button" className="ghost-button" onClick={resetBoard}>
-              Reset sample data
+              Reset
             </button>
           </div>
         </div>
       </section>
 
-      {user.role === 'admin' ? (
-        <section className="composer-card">
-          <div className="composer-header">
-            <div>
-              <p className="eyebrow">Admin controls</p>
-              <h2>Create task</h2>
-            </div>
-            <p className="muted-text">New tasks join the board immediately and autosave.</p>
+      <section className="composer-card">
+        <div className="composer-header">
+          <div>
+            <p className="eyebrow">{isAdmin ? 'Admin controls' : 'My work'}</p>
+            <h2>Create task</h2>
           </div>
+          <p className="muted-text">
+            {isAdmin
+              ? 'New tasks join the board immediately and autosave.'
+              : 'New tasks are automatically assigned to you.'}
+          </p>
+        </div>
 
-          <form className="task-form task-form-wide" onSubmit={addTask}>
-            <label htmlFor="task-title">Title</label>
-            <input
-              id="task-title"
-              type="text"
-              value={newTask.title}
-              onChange={(event) =>
-                setNewTask((current) => ({ ...current, title: event.target.value }))
-              }
-              placeholder="Sprint retro follow-ups"
-            />
+        <form className="task-form task-form-wide task-form-compact" onSubmit={addTask}>
+          <label htmlFor="task-title">Title</label>
+          <input
+            id="task-title"
+            type="text"
+            value={newTask.title}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, title: event.target.value }))
+            }
+            placeholder="Sprint retro follow-ups"
+          />
 
-            <label htmlFor="task-squad">Squad</label>
-            <input
-              id="task-squad"
-              type="text"
-              value={newTask.squad}
-              onChange={(event) =>
-                setNewTask((current) => ({ ...current, squad: event.target.value }))
-              }
-            />
+          <label htmlFor="task-squad">Area</label>
+          <input
+            id="task-squad"
+            type="text"
+            value={newTask.squad}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, squad: event.target.value }))
+            }
+          />
 
-            <label htmlFor="task-owner">Owner</label>
+          <label htmlFor="task-owner">Owner</label>
+          {isAdmin ? (
             <select
               id="task-owner"
               value={newTask.assignee}
@@ -389,99 +398,138 @@ function Dashboard() {
                 </option>
               ))}
             </select>
+          ) : (
+            <input id="task-owner" type="text" value={user.name} disabled />
+          )}
 
-            <label htmlFor="task-status">Status</label>
-            <select
-              id="task-status"
-              value={newTask.status}
-              onChange={(event) =>
-                setNewTask((current) => ({ ...current, status: event.target.value }))
-              }
-            >
-              {STAGES.map((stage) => (
-                <option key={stage} value={stage}>
-                  {stage}
-                </option>
-              ))}
-            </select>
+          <label htmlFor="task-status">Status</label>
+          <select
+            id="task-status"
+            value={newTask.status}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, status: event.target.value }))
+            }
+          >
+            {STAGES.map((stage) => (
+              <option key={stage} value={stage}>
+                {stage}
+              </option>
+            ))}
+          </select>
 
-            <label htmlFor="task-priority">Priority</label>
-            <select
-              id="task-priority"
-              value={newTask.priority}
-              onChange={(event) =>
-                setNewTask((current) => ({ ...current, priority: event.target.value }))
-              }
-            >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
+          <label htmlFor="task-priority">Priority</label>
+          <select
+            id="task-priority"
+            value={newTask.priority}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, priority: event.target.value }))
+            }
+          >
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
 
-            <label htmlFor="task-effort">Effort (hours)</label>
+          <label htmlFor="task-effort">Effort (hours)</label>
+          <input
+            id="task-effort"
+            type="number"
+            min="1"
+            value={newTask.effort}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, effort: event.target.value }))
+            }
+          />
+
+          <label htmlFor="task-start">Start date</label>
+          <input
+            id="task-start"
+            type="date"
+            value={newTask.start}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, start: event.target.value }))
+            }
+          />
+
+          <label htmlFor="task-end">End date</label>
+          <input
+            id="task-end"
+            type="date"
+            value={newTask.end}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, end: event.target.value }))
+            }
+          />
+
+          <label htmlFor="task-release">Release</label>
+          <input
+            id="task-release"
+            type="text"
+            value={newTask.release}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, release: event.target.value }))
+            }
+            placeholder="24.4"
+          />
+
+          <label htmlFor="task-bug-url">Bug or Jira URL</label>
+          <input
+            id="task-bug-url"
+            type="url"
+            value={newTask.bugUrl}
+            onChange={(event) =>
+              setNewTask((current) => ({ ...current, bugUrl: event.target.value }))
+            }
+            placeholder="https://jira.example.com/browse/ABC-123"
+          />
+          <div className="task-link-row">
+            {newTask.bugUrl ? (
+              <button
+                type="button"
+                className="ghost-button task-link-button"
+                onClick={() => window.open(newTask.bugUrl, '_blank', 'noopener,noreferrer')}
+                aria-label="Open task bug or Jira URL in a new tab"
+                title="Open in a new tab"
+              >
+                Open
+              </button>
+            ) : null}
+          </div>
+
+          <label className="checkbox-row" htmlFor="task-blocked">
             <input
-              id="task-effort"
-              type="number"
-              min="1"
-              value={newTask.effort}
+              id="task-blocked"
+              type="checkbox"
+              checked={newTask.blocked}
               onChange={(event) =>
-                setNewTask((current) => ({ ...current, effort: event.target.value }))
+                setNewTask((current) => ({ ...current, blocked: event.target.checked }))
               }
             />
+            Mark as blocked
+          </label>
 
-            <label htmlFor="task-start">Start date</label>
+          <label className="checkbox-row" htmlFor="task-milestone">
             <input
-              id="task-start"
-              type="date"
-              value={newTask.start}
+              id="task-milestone"
+              type="checkbox"
+              checked={newTask.milestone}
+              disabled={newTask.status !== 'Completed'}
               onChange={(event) =>
-                setNewTask((current) => ({ ...current, start: event.target.value }))
+                setNewTask((current) => ({ ...current, milestone: event.target.checked }))
               }
             />
+            Milestone
+          </label>
 
-            <label htmlFor="task-end">End date</label>
-            <input
-              id="task-end"
-              type="date"
-              value={newTask.end}
-              onChange={(event) =>
-                setNewTask((current) => ({ ...current, end: event.target.value }))
-              }
-            />
-
-            <label htmlFor="task-bug-url">Bug or Jira URL</label>
-            <input
-              id="task-bug-url"
-              type="url"
-              value={newTask.bugUrl}
-              onChange={(event) =>
-                setNewTask((current) => ({ ...current, bugUrl: event.target.value }))
-              }
-              placeholder="https://jira.example.com/browse/ABC-123"
-            />
-
-            <label className="checkbox-row" htmlFor="task-blocked">
-              <input
-                id="task-blocked"
-                type="checkbox"
-                checked={newTask.blocked}
-                onChange={(event) =>
-                  setNewTask((current) => ({ ...current, blocked: event.target.checked }))
-                }
-              />
-              Mark as blocked
-            </label>
-
-            <button type="submit" className="primary-button">
-              Add task
-            </button>
-          </form>
-        </section>
-      ) : null}
+          <button type="submit" className="primary-button">
+            Add task
+          </button>
+        </form>
+      </section>
 
       <section className="board-panel">
         <KanbanBoard
-          tasks={tasks}
+          tasks={accessibleTasks}
           user={user}
           searchTerm={searchTerm}
           assigneeFilter={assigneeFilter}

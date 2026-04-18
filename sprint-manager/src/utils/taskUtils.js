@@ -98,6 +98,20 @@ export function formatCommentDate(dateString) {
   }).format(date);
 }
 
+export function formatFullDate(dateString) {
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+  }).format(date);
+}
+
 export function getTaskTitleTone(task) {
   const now = new Date();
   const dueDate = new Date(task.end);
@@ -120,4 +134,24 @@ export function getTaskTitleTone(task) {
   }
 
   return 'title-stable';
+}
+
+function normalizeIdentity(value) {
+  return (value || '').trim().toLowerCase();
+}
+
+export function canUserAccessTask(user, task) {
+  if (!user || !task) {
+    return false;
+  }
+
+  if (user.role === 'admin') {
+    return true;
+  }
+
+  const userName = normalizeIdentity(user.name);
+  const userEmail = normalizeIdentity(user.email);
+  const assignee = normalizeIdentity(task.assignee);
+
+  return assignee === userName || assignee === userEmail;
 }

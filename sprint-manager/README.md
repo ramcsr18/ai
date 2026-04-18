@@ -1,6 +1,6 @@
-# Sprint Manager
+# Sprint Board
 
-Sprint Manager is a React delivery board for teams that need a simple sprint cockpit with
+Sprint Board is a React delivery board for teams that need a simple sprint cockpit with
 sticky-note workflow tracking, inline task editing, and Oracle SSO-ready authentication.
 
 ## Highlights

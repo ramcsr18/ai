@@ -79,6 +79,7 @@ export default function KanbanBoard({
                     task={task}
                     stackIndex={index}
                     stackDepth={stageTasks.length}
+                    isAdmin={user?.role === 'admin'}
                     canEdit={allowTaskEditing}
                     onUpdate={onTaskUpdate}
                     onCommentDraftChange={onCommentDraftChange}
