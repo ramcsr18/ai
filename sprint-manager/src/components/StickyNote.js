@@ -3,6 +3,7 @@ import {
   createComment,
   formatCommentDate,
   formatFullDate,
+  getDateInputValue,
   getTaskTitleTone,
 } from '../utils/taskUtils';
 
@@ -95,6 +96,28 @@ function OwnerIcon() {
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronIcon({ expanded }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+      className={`comment-toggle-icon ${expanded ? 'comment-toggle-icon-expanded' : ''}`}
+    >
+      <path
+        d="M5 8l5 5 5-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -226,7 +249,10 @@ export default function StickyNote({
       draggable={canEdit && !isEditingTitle && !isEditingArea && !isEditingOwner}
       onDragStart={canEdit ? onDragStart : undefined}
     >
-      <div className="note-panel-meta">
+      <div
+        className="note-panel-meta note-panel-meta-decorated"
+        style={{ background: statusHeaderColors[task.status] }}
+      >
         <div className="note-panel-meta-left">
           {isEditingArea ? (
             <input
@@ -320,10 +346,7 @@ export default function StickyNote({
           </div>
         ) : null}
       </div>
-      <div
-        className="note-title-band"
-        style={{ background: statusHeaderColors[task.status] }}
-      >
+      <div className="note-title-band">
         <div className="note-title-content">
           {isEditingTitle ? (
             <input
@@ -389,7 +412,7 @@ export default function StickyNote({
           id={`task-end-${task.id}`}
           className="inline-end-date"
           type="date"
-          value={task.end}
+          value={getDateInputValue(task.end)}
           onChange={(event) => onUpdate(task.id, { end: event.target.value })}
           disabled={!canEdit}
           aria-label={`End date for ${task.title}`}
@@ -454,7 +477,7 @@ export default function StickyNote({
           <input
             id={`task-start-${task.id}`}
             type="date"
-            value={task.start}
+            value={getDateInputValue(task.start)}
             onChange={(event) => onUpdate(task.id, { start: event.target.value })}
             disabled={!canEdit}
             aria-label={`Start date for ${task.title}`}
@@ -507,7 +530,7 @@ export default function StickyNote({
           <span>{sortedComments.length}</span>
         </div>
 
-        <div className="comments-list">
+        <div className="comments-list" aria-label={`${task.title} recent comments`}>
           {recentComments.length ? (
             recentComments.map((comment) => (
               <article key={comment.id} className="comment-item">
@@ -524,16 +547,24 @@ export default function StickyNote({
           <>
             <button
               type="button"
-              className="text-button"
+              className="text-button comment-history-toggle"
               onClick={() => setShowAllComments((current) => !current)}
+              aria-expanded={showAllComments}
+              aria-controls={`comment-history-${task.id}`}
             >
+              <ChevronIcon expanded={showAllComments} />
               {showAllComments
                 ? 'Hide older comments'
                 : `Show ${hiddenCommentCount} older comment${hiddenCommentCount > 1 ? 's' : ''}`}
             </button>
 
             {showAllComments ? (
-              <div className="comments-history" aria-label={`${task.title} comment history`}>
+              <div
+                id={`comment-history-${task.id}`}
+                className="comments-history"
+                aria-label={`${task.title} comment history`}
+              >
+                <div className="comments-history-heading">Comment history</div>
                 {historyComments.map((comment) => (
                   <article key={comment.id} className="comment-item comment-item-history">
                     <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>

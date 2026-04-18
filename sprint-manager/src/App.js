@@ -3,7 +3,7 @@ import './App.css';
 import KanbanBoard from './components/KanbanBoard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { STAGES, TEAM_MEMBERS } from './data/seedData';
-import { canUserAccessTask, normalizeTask } from './utils/taskUtils';
+import { canUserAccessTask, getCurrentTimestamp, normalizeTask } from './utils/taskUtils';
 import {
   createTask as createTaskRecord,
   fetchTasks,
@@ -238,7 +238,12 @@ function Dashboard() {
       return;
     }
 
-    const nextTask = prepareTask({ ...currentTask, ...patch });
+    const nextPatch =
+      patch.status === 'Completed' && currentTask.status !== 'Completed'
+        ? { ...patch, end: getCurrentTimestamp() }
+        : patch;
+
+    const nextTask = prepareTask({ ...currentTask, ...nextPatch });
 
     setTasks((currentTasks) =>
       currentTasks.map((task) => (task.id === taskId ? nextTask : task))

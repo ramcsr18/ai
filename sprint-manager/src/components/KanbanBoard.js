@@ -1,6 +1,6 @@
 import StickyNote from './StickyNote';
 import { STAGES } from '../data/seedData';
-import { sortTasksForStage } from '../utils/taskUtils';
+import { shouldDisplayTask, sortTasksForStage } from '../utils/taskUtils';
 
 export default function KanbanBoard({
   tasks,
@@ -15,7 +15,9 @@ export default function KanbanBoard({
 }) {
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
-  const visibleTasks = tasks.filter((task) => {
+  const displayableTasks = tasks.filter((task) => shouldDisplayTask(task));
+
+  const visibleTasks = displayableTasks.filter((task) => {
     const commentText = task.comments.map((comment) => comment.text).join(' ').toLowerCase();
     const matchesSearch =
       !normalizedSearchTerm ||

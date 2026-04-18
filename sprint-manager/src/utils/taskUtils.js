@@ -4,6 +4,8 @@ const PRIORITY_RANK = {
   Low: 2,
 };
 
+const TEN_DAYS_IN_MS = 10 * 24 * 60 * 60 * 1000;
+
 function normalizeComment(taskId, comment, index) {
   if (!comment) {
     return null;
@@ -50,6 +52,46 @@ function parseDate(value) {
   const timestamp = Date.parse(value);
 
   return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp;
+}
+
+export function getCurrentTimestamp() {
+  return new Date().toISOString();
+}
+
+export function getDateInputValue(value) {
+  if (!value) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    const trimmedValue = value.trim();
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
+      return trimmedValue;
+    }
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+export function shouldDisplayTask(task, now = new Date()) {
+  if (!task || task.status !== 'Completed') {
+    return true;
+  }
+
+  const endTime = Date.parse(task.end);
+
+  if (Number.isNaN(endTime)) {
+    return true;
+  }
+
+  return now.getTime() - endTime <= TEN_DAYS_IN_MS;
 }
 
 export function sortTasksForStage(tasks) {

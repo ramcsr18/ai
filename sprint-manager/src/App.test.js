@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import App from './App';
 
 beforeEach(() => {
   window.localStorage.clear();
   window.sessionStorage.clear();
+  jest.useRealTimers();
 });
 
 test('renders Oracle SSO login with a development fallback', () => {
@@ -135,6 +136,37 @@ test('milestone is enabled only in completed stage', () => {
   expect(screen.getByLabelText(/milestone/i, { selector: '#task-milestone' })).toBeEnabled();
 });
 
+test('moving a task to completed stamps the end date to today', async () => {
+  jest.useFakeTimers().setSystemTime(new Date('2026-05-01T09:30:00.000Z'));
+
+  render(<App />);
+
+  fireEvent.change(screen.getByLabelText(/display name/i), {
+    target: { value: 'Avery Chen' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /enter demo workspace/i }));
+
+  fireEvent.change(
+    within(screen.getByLabelText(/sso onboarding flow task card/i)).getByLabelText(
+      /^Status for SSO onboarding flow$/i,
+      {
+        selector: 'select',
+      }
+    ),
+    {
+      target: { value: 'Completed' },
+    }
+  );
+
+  await waitFor(() => {
+    expect(
+      within(screen.getByLabelText(/sso onboarding flow task card/i)).getByLabelText(
+        /end date for sso onboarding flow/i
+      )
+    ).toHaveValue('2026-05-01');
+  });
+});
+
 test('task title is not editable in completed stage', () => {
   window.localStorage.setItem(
     'sprint-manager-user',
@@ -215,17 +247,80 @@ test('shows only the newest three comments until expanded', () => {
   render(<App />);
 
   expect(screen.getByText(/show 3 older comments/i)).toBeInTheDocument();
-  const visibleDates = screen.getAllByText(/04\/1[3-8]/i).map((node) => node.textContent);
+  const recentComments = screen.getByLabelText(/comment heavy task recent comments/i);
+  const visibleDates = within(recentComments)
+    .getAllByText(/04\/1[3-8]/i)
+    .map((node) => node.textContent);
   expect(visibleDates).toEqual(['04/15', '04/14', '04/13']);
   expect(screen.queryByText('Comment 1')).not.toBeInTheDocument();
   expect(screen.queryByText('Comment 2')).not.toBeInTheDocument();
   expect(screen.queryByText('Comment 3')).not.toBeInTheDocument();
-  expect(screen.getByText('Comment 4')).toBeInTheDocument();
-  expect(screen.getByText('Comment 5')).toBeInTheDocument();
-  expect(screen.getByText('Comment 6')).toBeInTheDocument();
+  expect(within(recentComments).getByText('Comment 4')).toBeInTheDocument();
+  expect(within(recentComments).getByText('Comment 5')).toBeInTheDocument();
+  expect(within(recentComments).getByText('Comment 6')).toBeInTheDocument();
 
   fireEvent.click(screen.getByText(/show 3 older comments/i));
 
+  expect(screen.getByLabelText(/comment heavy task comment history/i)).toBeInTheDocument();
   expect(screen.getByText('Comment 1')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /hide older comments/i })).toBeInTheDocument();
+});
+
+test('hides completed tasks that are older than ten days', () => {
+  jest.useFakeTimers().setSystemTime(new Date('2026-04-18T09:30:00.000Z'));
+
+  window.localStorage.setItem(
+    'sprint-manager-user',
+    JSON.stringify({
+      name: 'Admin',
+      email: 'admin@example.com',
+      role: 'admin',
+      authProvider: 'demo',
+    })
+  );
+
+  window.localStorage.setItem(
+    'sprint-manager-tasks',
+    JSON.stringify([
+      {
+        id: 'task-completed-old',
+        title: 'Old completed task',
+        status: 'Completed',
+        effort: 3,
+        start: '2026-03-20',
+        end: '2026-04-01T08:00:00.000Z',
+        assignee: 'Avery Chen',
+        squad: 'Platform',
+        release: '',
+        milestone: true,
+        priority: 'Medium',
+        blocked: false,
+        bugUrl: '',
+        draftComment: '',
+        comments: [],
+      },
+      {
+        id: 'task-completed-recent',
+        title: 'Recent completed task',
+        status: 'Completed',
+        effort: 2,
+        start: '2026-04-05',
+        end: '2026-04-14T08:00:00.000Z',
+        assignee: 'Jordan Lee',
+        squad: 'Platform',
+        release: '',
+        milestone: true,
+        priority: 'Low',
+        blocked: false,
+        bugUrl: '',
+        draftComment: '',
+        comments: [],
+      },
+    ])
+  );
+
+  render(<App />);
+
+  expect(screen.queryByText(/old completed task/i)).not.toBeInTheDocument();
+  expect(screen.getByText(/recent completed task/i)).toBeInTheDocument();
 });
