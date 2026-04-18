@@ -1,0 +1,3 @@
+Title,Stage,Owner,Area,Effort,Start Date,End Date,Priority,Blocked,Release,Milestone,Bug/Jira URL,Comments
+"Oracle SSO onboarding","Implementation","Avery Chen","Platform","16","2026-04-18","2026-04-24","High","No","24.4","No","https://jira.example.com/browse/SPRINT-101","Imported from Confluence || Waiting on final callback URL"
+"Release notes sign-off","Completed","Nina Patel","PMO","4","2026-04-14","2026-04-18","Medium","No","24.4","Yes","","Business approval received"

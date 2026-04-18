@@ -261,6 +261,23 @@ function saveTask(task) {
   return getTaskById(task.id);
 }
 
+function replaceTasks(tasks) {
+  database.exec('BEGIN');
+
+  try {
+    deleteAllTasksStatement.run();
+    tasks.forEach((task) => {
+      upsertTaskStatement.run(taskToRow(task));
+    });
+    database.exec('COMMIT');
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+
+  return listTasks();
+}
+
 function resetTasks() {
   database.exec('BEGIN');
 
@@ -284,6 +301,7 @@ module.exports = {
   databasePath,
   listTasks,
   normalizeTask,
+  replaceTasks,
   resetTasks,
   saveTask,
 };

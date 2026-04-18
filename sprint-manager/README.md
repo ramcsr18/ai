@@ -65,3 +65,41 @@ Creates a production build in the `build` directory.
 ### `npm run start:prod`
 
 Starts the Node server, which serves the built frontend and the SQLite API together.
+
+### `npm run import:confluence -- <csv-file> [--replace]`
+
+Imports tasks from a CSV exported from a Confluence table into the local SQLite database.
+
+- Without `--replace`, imported tasks are merged into the current database using task `id`
+  when present, or generated ids when not present.
+- With `--replace`, the current SQLite task rows are cleared first and then replaced with the
+  imported tasks.
+- A sample CSV is available at `scripts/examples/confluence-template.csv`.
+
+Example:
+
+```bash
+npm run import:confluence -- scripts/examples/confluence-template.csv
+```
+
+Replace all local tasks:
+
+```bash
+npm run import:confluence -- scripts/examples/confluence-template.csv --replace
+```
+
+Supported CSV headers include common Confluence-style variants such as:
+
+- `Title`, `Task`, `Name`, `Summary`
+- `Stage`, `Status`
+- `Owner`, `Assignee`
+- `Area`, `Squad`, `Team`
+- `Start Date`
+- `End Date`, `Due Date`
+- `Effort`, `Estimate`, `Hours`
+- `Priority`
+- `Blocked`
+- `Release`
+- `Milestone`
+- `Bug/Jira URL`
+- `Comments`, `Notes`
