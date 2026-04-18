@@ -17,6 +17,9 @@
 .env.development.local
 .env.test.local
 .env.production.local
+/server/data/*.sqlite
+/server/data/*.sqlite-shm
+/server/data/*.sqlite-wal
 
 npm-debug.log*
 yarn-debug.log*

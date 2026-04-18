@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import App from './App';
 
 beforeEach(() => {
@@ -68,9 +68,10 @@ test('contributors can rename title and area from the note header', () => {
 
   expect(screen.getByRole('button', { name: 'Security' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^Oracle SSO onboarding$/i })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /^Avery Chen$/i })).not.toBeInTheDocument();
 });
 
-test('contributors can create tasks only for themselves', () => {
+test('contributors can create tasks only for themselves', async () => {
   render(<App />);
 
   fireEvent.change(screen.getByLabelText(/display name/i), {
@@ -86,7 +87,35 @@ test('contributors can create tasks only for themselves', () => {
   });
   fireEvent.click(screen.getByRole('button', { name: /add task/i }));
 
-  expect(screen.getByText(/My new contributor task/i)).toBeInTheDocument();
+  expect(await screen.findByText(/My new contributor task/i)).toBeInTheDocument();
+});
+
+test('admins can reassign task owner from the metadata row', () => {
+  window.localStorage.setItem(
+    'sprint-manager-user',
+    JSON.stringify({
+      name: 'Admin',
+      email: 'admin@example.com',
+      role: 'admin',
+      authProvider: 'demo',
+    })
+  );
+
+  render(<App />);
+
+  fireEvent.doubleClick(screen.getByRole('button', { name: /avery chen/i }));
+  const ownerInput = screen.getByLabelText(/owner for sso onboarding flow/i);
+  fireEvent.change(ownerInput, {
+    target: { value: 'Jordan Lee' },
+  });
+  fireEvent.blur(ownerInput);
+
+  expect(screen.queryByLabelText(/owner for sso onboarding flow/i)).not.toBeInTheDocument();
+  expect(
+    within(screen.getByLabelText(/sso onboarding flow task card/i)).getByRole('button', {
+      name: /^Jordan Lee$/i,
+    })
+  ).toBeInTheDocument();
 });
 
 test('milestone is enabled only in completed stage', () => {
@@ -186,6 +215,8 @@ test('shows only the newest three comments until expanded', () => {
   render(<App />);
 
   expect(screen.getByText(/show 3 older comments/i)).toBeInTheDocument();
+  const visibleDates = screen.getAllByText(/04\/1[3-8]/i).map((node) => node.textContent);
+  expect(visibleDates).toEqual(['04/15', '04/14', '04/13']);
   expect(screen.queryByText('Comment 1')).not.toBeInTheDocument();
   expect(screen.queryByText('Comment 2')).not.toBeInTheDocument();
   expect(screen.queryByText('Comment 3')).not.toBeInTheDocument();

@@ -5,6 +5,7 @@ import { sortTasksForStage } from '../utils/taskUtils';
 export default function KanbanBoard({
   tasks,
   user,
+  teamMembers,
   searchTerm,
   assigneeFilter,
   stageFilter,
@@ -80,6 +81,7 @@ export default function KanbanBoard({
                     stackIndex={index}
                     stackDepth={stageTasks.length}
                     isAdmin={user?.role === 'admin'}
+                    teamMembers={teamMembers}
                     canEdit={allowTaskEditing}
                     onUpdate={onTaskUpdate}
                     onCommentDraftChange={onCommentDraftChange}

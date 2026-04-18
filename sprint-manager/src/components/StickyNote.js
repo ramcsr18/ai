@@ -31,6 +31,12 @@ const statusHeaderColors = {
 const priorityOptions = ['High', 'Medium', 'Low'];
 const DEFAULT_VISIBLE_COMMENTS = 3;
 
+function getCommentTimestamp(comment) {
+  const timestamp = Date.parse(comment?.createdAt || '');
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
 function ExternalLinkIcon() {
   return (
     <svg
@@ -68,11 +74,38 @@ function ExternalLinkIcon() {
   );
 }
 
+function OwnerIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M4 17a6 6 0 0 1 12 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function StickyNote({
   task,
   stackIndex,
   stackDepth,
   isAdmin,
+  teamMembers,
   onUpdate,
   onCommentDraftChange,
   onCommentAdd,
@@ -83,8 +116,10 @@ export default function StickyNote({
   const [showAllComments, setShowAllComments] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingArea, setIsEditingArea] = useState(false);
+  const [isEditingOwner, setIsEditingOwner] = useState(false);
   const [draftTitle, setDraftTitle] = useState(task.title);
   const [draftArea, setDraftArea] = useState(task.squad);
+  const [draftOwner, setDraftOwner] = useState(task.assignee);
 
   useEffect(() => {
     setDraftTitle(task.title);
@@ -95,24 +130,36 @@ export default function StickyNote({
   }, [task.squad]);
 
   useEffect(() => {
+    setDraftOwner(task.assignee);
+  }, [task.assignee]);
+
+  useEffect(() => {
     setShowAllComments(false);
   }, [task.id, task.comments.length]);
 
-  const sortedComments = useMemo(
-    () =>
-      [...task.comments].sort(
-        (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-      ),
-    [task.comments]
-  );
+  const sortedComments = useMemo(() => {
+    const normalizedComments = Array.isArray(task.comments) ? task.comments : [];
 
-  const visibleComments = showAllComments
-    ? sortedComments
-    : sortedComments.slice(0, DEFAULT_VISIBLE_COMMENTS);
-  const hiddenCommentCount = Math.max(
-    sortedComments.length - DEFAULT_VISIBLE_COMMENTS,
-    0
-  );
+    return normalizedComments
+      .map((comment, index) => ({
+        ...comment,
+        _originalIndex: index,
+      }))
+      .sort((left, right) => {
+        const timestampDifference = getCommentTimestamp(right) - getCommentTimestamp(left);
+
+        if (timestampDifference !== 0) {
+          return timestampDifference;
+        }
+
+        return left._originalIndex - right._originalIndex;
+      })
+      .map(({ _originalIndex, ...comment }) => comment);
+  }, [task.comments]);
+
+  const recentComments = sortedComments.slice(0, DEFAULT_VISIBLE_COMMENTS);
+  const historyComments = sortedComments.slice(DEFAULT_VISIBLE_COMMENTS);
+  const hiddenCommentCount = historyComments.length;
 
   const submitComment = () => {
     const trimmedDraft = task.draftComment.trim();
@@ -151,7 +198,21 @@ export default function StickyNote({
     onUpdate(task.id, { squad: nextArea });
   };
 
+  const submitOwner = () => {
+    const nextOwner = draftOwner.trim();
+
+    setIsEditingOwner(false);
+
+    if (!nextOwner || nextOwner === task.assignee) {
+      setDraftOwner(task.assignee);
+      return;
+    }
+
+    onUpdate(task.id, { assignee: nextOwner });
+  };
+
   const canEditTitle = canEdit && task.status !== 'Completed';
+  const canEditOwner = canEdit && isAdmin;
   const titleToneClass = getTaskTitleTone(task);
 
   return (
@@ -162,19 +223,15 @@ export default function StickyNote({
         zIndex: Math.max(stackDepth - stackIndex, 1),
       }}
       aria-label={`${task.title} task card`}
-      draggable={canEdit && !isEditingTitle && !isEditingArea}
+      draggable={canEdit && !isEditingTitle && !isEditingArea && !isEditingOwner}
       onDragStart={canEdit ? onDragStart : undefined}
     >
-      <div
-        className="note-title-band"
-        style={{ background: statusHeaderColors[task.status] }}
-      >
-        <div>
-          {isAdmin ? <p className="note-owner">Owner: {task.assignee}</p> : null}
+      <div className="note-panel-meta">
+        <div className="note-panel-meta-left">
           {isEditingArea ? (
             <input
               id={`task-area-${task.id}`}
-              className="header-edit-input"
+              className="header-edit-input header-edit-input-meta"
               type="text"
               value={draftArea}
               onChange={(event) => setDraftArea(event.target.value)}
@@ -196,7 +253,7 @@ export default function StickyNote({
           ) : (
             <button
               type="button"
-              className="header-editable note-squad"
+              className="header-editable note-squad note-squad-meta"
               onDoubleClick={() => {
                 if (canEdit) {
                   setIsEditingArea(true);
@@ -208,6 +265,66 @@ export default function StickyNote({
               {task.squad}
             </button>
           )}
+        </div>
+        {isAdmin ? (
+          <div className="note-panel-meta-right">
+            {isEditingOwner ? (
+              <label className="note-owner note-owner-editor" htmlFor={`task-owner-${task.id}`}>
+                <OwnerIcon />
+                <>
+                  <input
+                    id={`task-owner-${task.id}`}
+                    className="header-edit-input header-edit-input-meta owner-edit-input"
+                    type="text"
+                    list={`task-owner-options-${task.id}`}
+                    value={draftOwner}
+                    onChange={(event) => setDraftOwner(event.target.value)}
+                    onBlur={submitOwner}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        submitOwner();
+                      }
+
+                      if (event.key === 'Escape') {
+                        setDraftOwner(task.assignee);
+                        setIsEditingOwner(false);
+                      }
+                    }}
+                    autoFocus
+                    aria-label={`Owner for ${task.title}`}
+                    title="Owner"
+                  />
+                  <datalist id={`task-owner-options-${task.id}`}>
+                    {teamMembers.map((member) => (
+                      <option key={member} value={member} />
+                    ))}
+                  </datalist>
+                </>
+              </label>
+            ) : (
+              <button
+                type="button"
+                className="header-editable note-owner note-owner-button"
+                onDoubleClick={() => {
+                  if (canEditOwner) {
+                    setIsEditingOwner(true);
+                  }
+                }}
+                disabled={!canEditOwner}
+                title={canEditOwner ? 'Double-click to edit owner' : 'Owner'}
+              >
+                <OwnerIcon />
+                <span>{task.assignee}</span>
+              </button>
+            )}
+          </div>
+        ) : null}
+      </div>
+      <div
+        className="note-title-band"
+        style={{ background: statusHeaderColors[task.status] }}
+      >
+        <div className="note-title-content">
           {isEditingTitle ? (
             <input
               id={`task-title-${task.id}`}
@@ -249,9 +366,6 @@ export default function StickyNote({
               {task.title}
             </button>
           )}
-        </div>
-        <div className="note-header-meta">
-          {task.release ? <span className="release-pill">R {task.release}</span> : null}
         </div>
       </div>
 
@@ -336,7 +450,7 @@ export default function StickyNote({
 
       <div className="task-edit-grid compact-grid">
         <div className="date-field">
-          <span className="mini-date">{formatFullDate(task.start)}</span>
+          <span className="mini-date">Start Date</span>
           <input
             id={`task-start-${task.id}`}
             type="date"
@@ -394,8 +508,8 @@ export default function StickyNote({
         </div>
 
         <div className="comments-list">
-          {visibleComments.length ? (
-            visibleComments.map((comment) => (
+          {recentComments.length ? (
+            recentComments.map((comment) => (
               <article key={comment.id} className="comment-item">
                 <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
                 <p>{comment.text}</p>
@@ -407,15 +521,28 @@ export default function StickyNote({
         </div>
 
         {hiddenCommentCount > 0 ? (
-          <button
-            type="button"
-            className="text-button"
-            onClick={() => setShowAllComments((current) => !current)}
-          >
-            {showAllComments
-              ? 'Hide older comments'
-              : `Show ${hiddenCommentCount} older comment${hiddenCommentCount > 1 ? 's' : ''}`}
-          </button>
+          <>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setShowAllComments((current) => !current)}
+            >
+              {showAllComments
+                ? 'Hide older comments'
+                : `Show ${hiddenCommentCount} older comment${hiddenCommentCount > 1 ? 's' : ''}`}
+            </button>
+
+            {showAllComments ? (
+              <div className="comments-history" aria-label={`${task.title} comment history`}>
+                {historyComments.map((comment) => (
+                  <article key={comment.id} className="comment-item comment-item-history">
+                    <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
+                    <p>{comment.text}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </>
         ) : null}
 
         <textarea

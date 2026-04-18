@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import KanbanBoard from './components/KanbanBoard';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { INITIAL_TASKS, STAGES, TEAM_MEMBERS } from './data/seedData';
-import { canUserAccessTask, normalizeTasks, normalizeTask } from './utils/taskUtils';
-
-const TASK_STORAGE_KEY = 'sprint-manager-tasks';
+import { STAGES, TEAM_MEMBERS } from './data/seedData';
+import { canUserAccessTask, normalizeTask } from './utils/taskUtils';
+import {
+  createTask as createTaskRecord,
+  fetchTasks,
+  getInitialTaskSnapshot,
+  resetTasks as resetTaskRecords,
+  saveTask,
+} from './services/taskApi';
 
 function ExternalLinkIcon() {
   return (
@@ -44,28 +49,6 @@ function ExternalLinkIcon() {
   );
 }
 
-function readStoredTasks() {
-  if (typeof window === 'undefined') {
-    return normalizeTasks(INITIAL_TASKS);
-  }
-
-  const storedTasks = window.localStorage.getItem(TASK_STORAGE_KEY);
-
-  if (!storedTasks) {
-    return normalizeTasks(INITIAL_TASKS);
-  }
-
-  try {
-    const parsedTasks = JSON.parse(storedTasks);
-
-    return normalizeTasks(parsedTasks).length
-      ? normalizeTasks(parsedTasks)
-      : normalizeTasks(INITIAL_TASKS);
-  } catch {
-    return normalizeTasks(INITIAL_TASKS);
-  }
-}
-
 function LoginScreen() {
   const {
     loginDemo,
@@ -101,8 +84,8 @@ function LoginScreen() {
             <span>Uses Oracle IAM / IDCS OAuth endpoints with PKCE for browser sign-in.</span>
           </div>
           <div>
-            <strong>Autosaved task board</strong>
-            <span>Board edits, task metadata, and comment drafts persist automatically.</span>
+            <strong>SQLite persistence</strong>
+            <span>Board edits, task metadata, and comment drafts persist in a shared database.</span>
           </div>
         </div>
       </section>
@@ -176,7 +159,10 @@ function LoginScreen() {
 function Dashboard() {
   const { user, logout } = useAuth();
   const isAdmin = user.role === 'admin';
-  const [tasks, setTasks] = useState(readStoredTasks);
+  const [tasks, setTasks] = useState(getInitialTaskSnapshot);
+  const tasksRef = useRef(tasks);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(process.env.NODE_ENV !== 'test');
+  const [taskError, setTaskError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [stageFilter, setStageFilter] = useState('all');
@@ -198,41 +184,103 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    window.localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
+    tasksRef.current = tasks;
   }, [tasks]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'test') {
+      setIsLoadingTasks(false);
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    const loadTasks = async () => {
+      try {
+        setIsLoadingTasks(true);
+        const loadedTasks = await fetchTasks();
+
+        if (!isCancelled) {
+          setTasks(loadedTasks);
+          setTaskError('');
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setTaskError(error.message || 'Unable to load tasks from SQLite.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingTasks(false);
+        }
+      }
+    };
+
+    void loadTasks();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const accessibleTasks = tasks.filter((task) => canUserAccessTask(user, task));
   const availableAssignees = [...new Set(accessibleTasks.map((task) => task.assignee))];
 
-  const updateTask = (taskId, patch) => {
+  const prepareTask = (task) =>
+    normalizeTask({
+      ...task,
+      milestone: task.status === 'Completed' ? task.milestone : false,
+    });
+
+  const updateTask = async (taskId, patch) => {
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask || !canUserAccessTask(user, currentTask)) {
+      return;
+    }
+
+    const nextTask = prepareTask({ ...currentTask, ...patch });
+
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId && canUserAccessTask(user, task)
-          ? normalizeTask({ ...task, ...patch })
-          : task
-      )
+      currentTasks.map((task) => (task.id === taskId ? nextTask : task))
     );
+    setTaskError('');
+
+    try {
+      if (process.env.NODE_ENV === 'test') {
+        await saveTask(nextTask);
+        return;
+      }
+
+      const persistedTask = await saveTask(nextTask);
+      setTasks((currentTasks) =>
+        currentTasks.map((task) => (task.id === taskId ? persistedTask : task))
+      );
+    } catch (error) {
+      setTasks((currentTasks) =>
+        currentTasks.map((task) => (task.id === taskId ? currentTask : task))
+      );
+      setTaskError(error.message || 'Unable to save task changes to SQLite.');
+    }
   };
 
   const updateCommentDraft = (taskId, draftComment) => {
-    updateTask(taskId, { draftComment });
+    void updateTask(taskId, { draftComment });
   };
 
   const addComment = (taskId, comment) => {
-    setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId && canUserAccessTask(user, task)
-          ? normalizeTask({
-              ...task,
-              comments: [comment, ...task.comments],
-              draftComment: '',
-            })
-          : task
-      )
-    );
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask || !canUserAccessTask(user, currentTask)) {
+      return;
+    }
+
+    void updateTask(taskId, {
+      comments: [comment, ...currentTask.comments],
+      draftComment: '',
+    });
   };
 
-  const addTask = (event) => {
+  const addTask = async (event) => {
     event.preventDefault();
 
     const title = newTask.title.trim();
@@ -241,36 +289,45 @@ function Dashboard() {
       return;
     }
 
-    setTasks((currentTasks) => [
-      normalizeTask({
-        ...newTask,
-        assignee: isAdmin ? newTask.assignee : user.name,
-        milestone: newTask.status === 'Completed' ? newTask.milestone : false,
-        title,
-        effort: Number(newTask.effort),
-        id: `task-${Date.now()}`,
-      }),
-      ...currentTasks,
-    ]);
+    const taskToCreate = prepareTask({
+      ...newTask,
+      assignee: isAdmin ? newTask.assignee : user.name,
+      title,
+      effort: Number(newTask.effort),
+      id: `task-${Date.now()}`,
+    });
 
-    setNewTask((current) => ({
-      ...current,
-      title: '',
-      bugUrl: '',
-      comments: [],
-      draftComment: '',
-      effort: 8,
-      blocked: false,
-      status: STAGES[0],
-      release: '',
-      milestone: false,
-      priority: 'Medium',
-      assignee: isAdmin ? TEAM_MEMBERS[0] : user.name,
-    }));
+    try {
+      const createdTask = await createTaskRecord(taskToCreate);
+      setTasks((currentTasks) => [createdTask, ...currentTasks]);
+      setTaskError('');
+      setNewTask((current) => ({
+        ...current,
+        title: '',
+        bugUrl: '',
+        comments: [],
+        draftComment: '',
+        effort: 8,
+        blocked: false,
+        status: STAGES[0],
+        release: '',
+        milestone: false,
+        priority: 'Medium',
+        assignee: isAdmin ? TEAM_MEMBERS[0] : user.name,
+      }));
+    } catch (error) {
+      setTaskError(error.message || 'Unable to create the task in SQLite.');
+    }
   };
 
-  const resetBoard = () => {
-    setTasks(normalizeTasks(INITIAL_TASKS));
+  const resetBoard = async () => {
+    try {
+      const resetTasks = await resetTaskRecords();
+      setTasks(resetTasks);
+      setTaskError('');
+    } catch (error) {
+      setTaskError(error.message || 'Unable to reset the task board.');
+    }
   };
 
   const totalEffort = accessibleTasks.reduce((sum, task) => sum + task.effort, 0);
@@ -299,36 +356,10 @@ function Dashboard() {
         </div>
       </header>
 
-      <section className="summary-grid" aria-label="Sprint summary">
-        <article
-          className="summary-card"
-          title="Total tasks available to you in the current workspace."
-        >
-          <p className="eyebrow">Total tasks</p>
-          <strong>{accessibleTasks.length}</strong>
-        </article>
-        <article
-          className="summary-card"
-          title="Total planned effort across all tasks you can access."
-        >
-          <p className="eyebrow">Planned effort</p>
-          <strong>{totalEffort}h</strong>
-        </article>
-        <article
-          className="summary-card"
-          title="Tasks already delivered to production."
-        >
-          <p className="eyebrow">Production ready</p>
-          <strong className="summary-value-green">{productionCount}</strong>
-        </article>
-        <article
-          className="summary-card"
-          title="Blocked tasks currently needing attention."
-        >
-          <p className="eyebrow">Risks</p>
-          <strong className="summary-value-red">{blockedCount}</strong>
-        </article>
-      </section>
+      {taskError ? <div className="status-banner error-banner">{taskError}</div> : null}
+      {isLoadingTasks ? (
+        <div className="status-banner info-banner">Loading tasks from SQLite...</div>
+      ) : null}
 
       <section className="toolbar-card">
         <div className="toolbar-grid">
@@ -383,6 +414,37 @@ function Dashboard() {
             </button>
           </div>
         </div>
+      </section>
+
+      <section className="summary-grid" aria-label="Sprint summary">
+        <article
+          className="summary-card"
+          title="Total tasks available to you in the current workspace."
+        >
+          <p className="eyebrow">Total tasks</p>
+          <strong>{accessibleTasks.length}</strong>
+        </article>
+        <article
+          className="summary-card"
+          title="Total planned effort across all tasks you can access."
+        >
+          <p className="eyebrow">Planned effort</p>
+          <strong>{totalEffort}h</strong>
+        </article>
+        <article
+          className="summary-card"
+          title="Tasks already delivered to production."
+        >
+          <p className="eyebrow">Production ready</p>
+          <strong className="summary-value-green">{productionCount}</strong>
+        </article>
+        <article
+          className="summary-card"
+          title="Blocked tasks currently needing attention."
+        >
+          <p className="eyebrow">Risks</p>
+          <strong className="summary-value-red">{blockedCount}</strong>
+        </article>
       </section>
 
       <section className="composer-card">
@@ -568,6 +630,7 @@ function Dashboard() {
         <KanbanBoard
           tasks={accessibleTasks}
           user={user}
+          teamMembers={TEAM_MEMBERS}
           searchTerm={searchTerm}
           assigneeFilter={assigneeFilter}
           stageFilter={stageFilter}
