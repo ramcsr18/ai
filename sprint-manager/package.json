@@ -19,6 +19,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "import:confluence": "node scripts/import-confluence-csv.js",
+    "import:confluence:json": "node scripts/import-confluence-json.js",
+    "import:jira": "node scripts/import-jira.js",
+    "import:bugdb": "node scripts/import-bugdb.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

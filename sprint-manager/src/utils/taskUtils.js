@@ -80,6 +80,59 @@ export function getDateInputValue(value) {
   return date.toISOString().slice(0, 10);
 }
 
+export function formatShortDate(dateString) {
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: '2-digit',
+  }).format(date);
+}
+
+export function parseDisplayDate(value) {
+  const rawValue = String(value || '').trim();
+
+  if (!rawValue) {
+    return '';
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+    return rawValue;
+  }
+
+  const shortMatch = rawValue.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+
+  if (shortMatch) {
+    const month = Number(shortMatch[1]);
+    const day = Number(shortMatch[2]);
+    const yearValue = shortMatch[3];
+    const year = yearValue.length === 2 ? 2000 + Number(yearValue) : Number(yearValue);
+
+    const parsedDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+
+    if (
+      parsedDate.getUTCFullYear() === year &&
+      parsedDate.getUTCMonth() === month - 1 &&
+      parsedDate.getUTCDate() === day
+    ) {
+      return parsedDate.toISOString().slice(0, 10);
+    }
+  }
+
+  const parsedDate = new Date(rawValue);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return '';
+  }
+
+  return parsedDate.toISOString().slice(0, 10);
+}
+
 export function shouldDisplayTask(task, now = new Date()) {
   if (!task || task.status !== 'Completed') {
     return true;

@@ -11,7 +11,7 @@ const STAGES = [
 
 const INITIAL_TASKS = [
   {
-    id: 'task-101',
+    id: 101,
     title: 'SSO onboarding flow',
     status: 'Implementation',
     effort: 20,
@@ -26,12 +26,12 @@ const INITIAL_TASKS = [
     bugUrl: 'https://jira.example.com/browse/SPRINT-101',
     comments: [
       {
-        id: 'comment-101-a',
+        id: 1001,
         text: 'Frontend screens approved. Waiting on final callback URL from IT.',
         createdAt: '2026-04-17T08:10:00.000Z',
       },
       {
-        id: 'comment-101-b',
+        id: 1002,
         text: 'Redirect URI list reviewed with the security team.',
         createdAt: '2026-04-16T10:25:00.000Z',
       },
@@ -39,7 +39,7 @@ const INITIAL_TASKS = [
     draftComment: '',
   },
   {
-    id: 'task-102',
+    id: 102,
     title: 'Burndown dashboard refresh',
     status: 'Analysis',
     effort: 12,
@@ -54,7 +54,7 @@ const INITIAL_TASKS = [
     bugUrl: '',
     comments: [
       {
-        id: 'comment-102-a',
+        id: 1003,
         text: 'Need confirmation on KPI definitions before design starts.',
         createdAt: '2026-04-17T05:00:00.000Z',
       },
@@ -62,7 +62,7 @@ const INITIAL_TASKS = [
     draftComment: '',
   },
   {
-    id: 'task-103',
+    id: 103,
     title: 'Mobile navigation QA sweep',
     status: 'Testing',
     effort: 8,
@@ -77,12 +77,12 @@ const INITIAL_TASKS = [
     bugUrl: 'https://jira.example.com/browse/SPRINT-203',
     comments: [
       {
-        id: 'comment-103-a',
+        id: 1004,
         text: 'Android 13 regression still open on the profile menu.',
         createdAt: '2026-04-17T07:40:00.000Z',
       },
       {
-        id: 'comment-103-b',
+        id: 1005,
         text: 'iOS results are clear after the latest patch.',
         createdAt: '2026-04-16T15:20:00.000Z',
       },
@@ -90,7 +90,7 @@ const INITIAL_TASKS = [
     draftComment: '',
   },
   {
-    id: 'task-104',
+    id: 104,
     title: 'Release notes for sprint 18',
     status: 'QA/UAT',
     effort: 5,
@@ -105,7 +105,7 @@ const INITIAL_TASKS = [
     bugUrl: '',
     comments: [
       {
-        id: 'comment-104-a',
+        id: 1006,
         text: 'Draft reviewed by stakeholders. Final screenshots still pending.',
         createdAt: '2026-04-17T09:30:00.000Z',
       },
@@ -113,7 +113,7 @@ const INITIAL_TASKS = [
     draftComment: '',
   },
   {
-    id: 'task-105',
+    id: 105,
     title: 'Alert routing cleanup',
     status: 'Production',
     effort: 9,
@@ -128,7 +128,7 @@ const INITIAL_TASKS = [
     bugUrl: 'https://jira.example.com/browse/OPS-77',
     comments: [
       {
-        id: 'comment-105-a',
+        id: 1007,
         text: 'Rolled out successfully with no incidents in the last 48 hours.',
         createdAt: '2026-04-15T11:30:00.000Z',
       },
@@ -136,7 +136,7 @@ const INITIAL_TASKS = [
     draftComment: '',
   },
   {
-    id: 'task-106',
+    id: 106,
     title: 'Customer import validation',
     status: 'Design',
     effort: 13,
@@ -151,12 +151,12 @@ const INITIAL_TASKS = [
     bugUrl: '',
     comments: [
       {
-        id: 'comment-106-a',
+        id: 1008,
         text: 'Error state copy ready. Edge-case mapping session scheduled tomorrow.',
         createdAt: '2026-04-17T06:00:00.000Z',
       },
       {
-        id: 'comment-106-b',
+        id: 1009,
         text: 'Validation rules aligned with the import team.',
         createdAt: '2026-04-16T04:00:00.000Z',
       },
@@ -164,7 +164,7 @@ const INITIAL_TASKS = [
     draftComment: '',
   },
   {
-    id: 'task-107',
+    id: 107,
     title: 'New workspace request intake',
     status: 'Ingestion',
     effort: 3,
@@ -179,7 +179,7 @@ const INITIAL_TASKS = [
     bugUrl: '',
     comments: [
       {
-        id: 'comment-107-a',
+        id: 1010,
         text: 'Ticket received from support; triage during standup.',
         createdAt: '2026-04-17T03:20:00.000Z',
       },

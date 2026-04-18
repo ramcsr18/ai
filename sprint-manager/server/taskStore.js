@@ -30,6 +30,13 @@ database.exec(`
   )
 `);
 
+database.exec(`
+  CREATE TABLE IF NOT EXISTS app_sequences (
+    name TEXT PRIMARY KEY,
+    next_value INTEGER NOT NULL
+  )
+`);
+
 const upsertTaskStatement = database.prepare(`
   INSERT INTO tasks (
     id,
@@ -124,6 +131,110 @@ const selectTaskStatement = database.prepare(`
 
 const countTasksStatement = database.prepare('SELECT COUNT(*) AS count FROM tasks');
 const deleteAllTasksStatement = database.prepare('DELETE FROM tasks');
+const selectSequenceStatement = database.prepare(`
+  SELECT next_value
+  FROM app_sequences
+  WHERE name = ?
+`);
+const upsertSequenceStatement = database.prepare(`
+  INSERT INTO app_sequences (name, next_value)
+  VALUES (?, ?)
+  ON CONFLICT(name) DO UPDATE SET next_value = excluded.next_value
+`);
+
+function parseStrictNumericId(value) {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+    return value;
+  }
+
+  const rawValue = String(value || '').trim();
+
+  if (!rawValue) {
+    return null;
+  }
+
+  return /^\d+$/.test(rawValue) ? Number(rawValue) : null;
+}
+
+function extractNumericSeed(value) {
+  const strictValue = parseStrictNumericId(value);
+
+  if (strictValue) {
+    return strictValue;
+  }
+
+  const rawValue = String(value || '').trim();
+  const match = rawValue.match(/\d+/);
+
+  return match ? Number(match[0]) : null;
+}
+
+function initializeSequence(name, nextValue) {
+  const existing = selectSequenceStatement.get(name);
+
+  if (!existing) {
+    upsertSequenceStatement.run(name, nextValue);
+    return;
+  }
+
+  if (existing.next_value < nextValue) {
+    upsertSequenceStatement.run(name, nextValue);
+  }
+}
+
+function getNextSequenceValue(name) {
+  const current = selectSequenceStatement.get(name);
+
+  if (!current) {
+    initializeSequence(name, 1);
+    return getNextSequenceValue(name);
+  }
+
+  const value = Number(current.next_value);
+  upsertSequenceStatement.run(name, value + 1);
+  return value;
+}
+
+function reserveSequenceValue(name, value) {
+  const numericValue = parseStrictNumericId(value);
+
+  if (!numericValue) {
+    return null;
+  }
+
+  const current = selectSequenceStatement.get(name);
+
+  if (!current || Number(current.next_value) <= numericValue) {
+    upsertSequenceStatement.run(name, numericValue + 1);
+  }
+
+  return numericValue;
+}
+
+function initializeSequencesFromData() {
+  const rows = selectAllTasksStatement.all();
+  let maxTaskId = 0;
+  let maxCommentId = 0;
+
+  rows.forEach((row) => {
+    maxTaskId = Math.max(maxTaskId, extractNumericSeed(row.id) || 0);
+
+    try {
+      const comments = JSON.parse(row.comments_json || '[]');
+
+      if (Array.isArray(comments)) {
+        comments.forEach((comment) => {
+          maxCommentId = Math.max(maxCommentId, extractNumericSeed(comment?.id) || 0);
+        });
+      }
+    } catch {
+      // Ignore malformed comment payloads while establishing future sequences.
+    }
+  });
+
+  initializeSequence('task_id', maxTaskId + 1 || 1);
+  initializeSequence('comment_id', maxCommentId + 1 || 1);
+}
 
 function normalizeComment(comment, index, taskId) {
   if (!comment || typeof comment !== 'object') {
@@ -136,22 +247,33 @@ function normalizeComment(comment, index, taskId) {
     return null;
   }
 
+  const normalizedCommentId =
+    reserveSequenceValue('comment_id', comment.id) ??
+    (comment.id !== undefined && comment.id !== null && String(comment.id).trim()
+      ? String(comment.id).trim()
+      : getNextSequenceValue('comment_id'));
+
   return {
-    id: String(comment.id || `${taskId}-comment-${index}`),
+    id: normalizedCommentId,
     text,
     createdAt: String(comment.createdAt || new Date().toISOString()),
   };
 }
 
 function normalizeTask(task) {
+  const normalizedTaskId =
+    reserveSequenceValue('task_id', task.id) ??
+    (task.id !== undefined && task.id !== null && String(task.id).trim()
+      ? String(task.id).trim()
+      : getNextSequenceValue('task_id'));
   const comments = Array.isArray(task.comments)
     ? task.comments
-        .map((comment, index) => normalizeComment(comment, index, task.id))
+        .map((comment, index) => normalizeComment(comment, index, normalizedTaskId))
         .filter(Boolean)
     : [];
 
   return {
-    id: String(task.id || `task-${Date.now()}`),
+    id: normalizedTaskId,
     title: String(task.title || '').trim(),
     status: String(task.status || 'Ingestion'),
     effort: Number(task.effort) || 1,
@@ -209,7 +331,7 @@ function taskToRow(task) {
   }
 
   return {
-    id: normalizedTask.id,
+    id: String(normalizedTask.id),
     title: normalizedTask.title,
     status: normalizedTask.status,
     effort: normalizedTask.effort,
@@ -256,9 +378,10 @@ function getTaskById(id) {
 }
 
 function saveTask(task) {
-  upsertTaskStatement.run(taskToRow(task));
+  const row = taskToRow(task);
+  upsertTaskStatement.run(row);
 
-  return getTaskById(task.id);
+  return getTaskById(row.id);
 }
 
 function replaceTasks(tasks) {
@@ -296,6 +419,7 @@ function resetTasks() {
 }
 
 seedIfEmpty();
+initializeSequencesFromData();
 
 module.exports = {
   databasePath,

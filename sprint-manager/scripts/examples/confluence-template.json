@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "title": "Oracle SSO onboarding",
+      "status": "Implementation",
+      "effort": 16,
+      "start": "2026-01-02",
+      "end": "2026-01-05",
+      "assignee": "Avery Chen",
+      "area": "Platform",
+      "release": "24.4",
+      "priority": "High",
+      "blocked": false,
+      "jiraUrl": "https://jira.example.com/browse/SPRINT-101",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/05 Final SSO callback verified",
+        "12/22 Oracle app registration updated",
+        "12/18 Initial security review completed"
+      ]
+    },
+    {
+      "title": "Release notes sign-off",
+      "status": "Completed",
+      "effort": 4,
+      "start": "2026-01-03",
+      "end": "2026-01-06",
+      "owner": "Nina Patel",
+      "area": "PMO",
+      "priority": "Medium",
+      "milestone": true,
+      "commentsOrder": "oldest-first",
+      "comments": [
+        "12/29 Draft sent for review",
+        "01/02 Stakeholder comments received",
+        "01/06 Approval completed"
+      ]
+    }
+  ]
+}

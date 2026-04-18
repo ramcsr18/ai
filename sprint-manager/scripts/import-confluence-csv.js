@@ -1,6 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { normalizeTask, replaceTasks, saveTask } = require('../server/taskStore');
+const { createComments } = require('./import-confluence-json');
+const { normalizeImportedDate } = require('./import-date-utils');
 
 const STAGES = new Set([
   'Ingestion',
@@ -154,23 +156,7 @@ function parseCsv(content) {
 }
 
 function normalizeDate(value) {
-  const rawValue = String(value || '').trim();
-
-  if (!rawValue) {
-    return '';
-  }
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
-    return rawValue;
-  }
-
-  const parsedDate = new Date(rawValue);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '';
-  }
-
-  return parsedDate.toISOString().slice(0, 10);
+  return normalizeImportedDate(value);
 }
 
 function normalizeStatus(value) {
@@ -221,30 +207,6 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '');
 }
 
-function createTaskId(title, rowNumber) {
-  const slug = slugify(title) || `row-${rowNumber}`;
-  return `confluence-${slug}-${rowNumber}`;
-}
-
-function createComments(rawComments, taskId, importedAt) {
-  const text = String(rawComments || '').trim();
-
-  if (!text) {
-    return [];
-  }
-
-  const commentParts = text
-    .split(/\r?\n|\s*\|\|\s*/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  return commentParts.map((comment, index) => ({
-    id: `${taskId}-import-comment-${index + 1}`,
-    text: comment,
-    createdAt: new Date(importedAt.getTime() - index * 1000).toISOString(),
-  }));
-}
-
 function toRowObject(headers, row) {
   return headers.reduce((result, header, index) => {
     if (!header) {
@@ -263,17 +225,21 @@ function buildTask(rowData, rowNumber, importedAt) {
     throw new Error(`Row ${rowNumber} is missing a task title.`);
   }
 
-  const id = rowData.id || createTaskId(title, rowNumber);
   const status = normalizeStatus(rowData.status);
+  const start = normalizeDate(rowData.start);
   const normalizedEndDate = normalizeDate(rowData.end);
   const end =
     status === 'Completed' ? normalizedEndDate || importedAt.toISOString().slice(0, 10) : normalizedEndDate;
+  const commentContext = {
+    start,
+    end,
+    commentOrder: 'newest-first',
+  };
   const task = normalizeTask({
-    id,
     title,
     status,
     effort: normalizeEffort(rowData.effort),
-    start: normalizeDate(rowData.start),
+    start,
     end,
     assignee: rowData.assignee || '',
     squad: rowData.squad || '',
@@ -284,7 +250,7 @@ function buildTask(rowData, rowNumber, importedAt) {
     blocked: normalizeBoolean(rowData.blocked),
     bugUrl: rowData.bugUrl || '',
     draftComment: '',
-    comments: createComments(rowData.comments, id, importedAt),
+    comments: createComments(rowData.comments, commentContext, importedAt),
   });
 
   return task;

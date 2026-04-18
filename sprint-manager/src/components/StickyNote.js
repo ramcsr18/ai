@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   createComment,
   formatCommentDate,
@@ -125,6 +125,7 @@ function ChevronIcon({ expanded }) {
 
 export default function StickyNote({
   task,
+  isActive,
   stackIndex,
   stackDepth,
   isAdmin,
@@ -132,7 +133,9 @@ export default function StickyNote({
   onUpdate,
   onCommentDraftChange,
   onCommentAdd,
+  onCommentUpdate,
   onDragStart,
+  onActivate,
   canEdit,
   stageOptions,
 }) {
@@ -140,9 +143,12 @@ export default function StickyNote({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingArea, setIsEditingArea] = useState(false);
   const [isEditingOwner, setIsEditingOwner] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState('');
+  const [draftCommentText, setDraftCommentText] = useState('');
   const [draftTitle, setDraftTitle] = useState(task.title);
   const [draftArea, setDraftArea] = useState(task.squad);
   const [draftOwner, setDraftOwner] = useState(task.assignee);
+  const commentHistoryRef = useRef(null);
 
   useEffect(() => {
     setDraftTitle(task.title);
@@ -159,6 +165,26 @@ export default function StickyNote({
   useEffect(() => {
     setShowAllComments(false);
   }, [task.id, task.comments.length]);
+
+  useEffect(() => {
+    setEditingCommentId('');
+    setDraftCommentText('');
+  }, [task.id]);
+
+  useEffect(() => {
+    if (
+      !showAllComments ||
+      !commentHistoryRef.current ||
+      typeof commentHistoryRef.current.scrollIntoView !== 'function'
+    ) {
+      return;
+    }
+
+    commentHistoryRef.current.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+  }, [showAllComments]);
 
   const sortedComments = useMemo(() => {
     const normalizedComments = Array.isArray(task.comments) ? task.comments : [];
@@ -193,6 +219,32 @@ export default function StickyNote({
 
     setShowAllComments(false);
     onCommentAdd(task.id, createComment(trimmedDraft));
+  };
+
+  const startEditingComment = (comment) => {
+    if (!canEditComments) {
+      return;
+    }
+
+    setEditingCommentId(comment.id);
+    setDraftCommentText(comment.text);
+  };
+
+  const stopEditingComment = () => {
+    setEditingCommentId('');
+    setDraftCommentText('');
+  };
+
+  const submitEditedComment = (comment) => {
+    const trimmedText = draftCommentText.trim();
+
+    if (!trimmedText || trimmedText === comment.text) {
+      stopEditingComment();
+      return;
+    }
+
+    onCommentUpdate(task.id, comment.id, trimmedText);
+    stopEditingComment();
   };
 
   const submitTitle = () => {
@@ -236,159 +288,208 @@ export default function StickyNote({
 
   const canEditTitle = canEdit && task.status !== 'Completed';
   const canEditOwner = canEdit && isAdmin;
+  const canEditComments = canEdit && isAdmin;
   const titleToneClass = getTaskTitleTone(task);
+
+  const renderComment = (comment, isHistory = false) => {
+    const isEditingComment = editingCommentId === comment.id;
+
+    return (
+      <article
+        key={comment.id}
+        className={`comment-item ${isHistory ? 'comment-item-history' : ''} ${canEditComments ? 'comment-item-editable' : ''}`}
+      >
+        <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
+        {isEditingComment ? (
+          <textarea
+            className="comment-edit-input"
+            value={draftCommentText}
+            onChange={(event) => setDraftCommentText(event.target.value)}
+            onBlur={() => submitEditedComment(comment)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                submitEditedComment(comment);
+              }
+
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                stopEditingComment();
+              }
+            }}
+            aria-label={`Edit comment for ${task.title}`}
+            title="Edit comment"
+            autoFocus
+            rows={2}
+          />
+        ) : (
+          <p
+            onDoubleClick={() => startEditingComment(comment)}
+            title={canEditComments ? 'Double-click to edit comment' : undefined}
+          >
+            {comment.text}
+          </p>
+        )}
+      </article>
+    );
+  };
 
   return (
     <article
-      className={`sticky-note ${canEdit ? 'sticky-note-draggable' : ''}`}
+      className={`sticky-note ${isActive ? 'sticky-note-active' : ''}`}
       style={{
         backgroundColor: statusColors[task.status],
-        zIndex: Math.max(stackDepth - stackIndex, 1),
+        zIndex: isActive ? stackDepth + 2 : Math.max(stackDepth - stackIndex, 1),
       }}
       aria-label={`${task.title} task card`}
-      draggable={canEdit && !isEditingTitle && !isEditingArea && !isEditingOwner}
-      onDragStart={canEdit ? onDragStart : undefined}
+      onClick={onActivate}
     >
       <div
-        className="note-panel-meta note-panel-meta-decorated"
-        style={{ background: statusHeaderColors[task.status] }}
+        className={`sticky-note-drag-header ${canEdit ? 'sticky-note-drag-header-enabled' : ''}`}
+        draggable={canEdit && !isEditingTitle && !isEditingArea && !isEditingOwner}
+        onDragStart={canEdit ? onDragStart : undefined}
       >
-        <div className="note-panel-meta-left">
-          {isEditingArea ? (
-            <input
-              id={`task-area-${task.id}`}
-              className="header-edit-input header-edit-input-meta"
-              type="text"
-              value={draftArea}
-              onChange={(event) => setDraftArea(event.target.value)}
-              onBlur={submitArea}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  submitArea();
-                }
+        <div
+          className="note-panel-meta note-panel-meta-decorated"
+          style={{ background: statusHeaderColors[task.status] }}
+        >
+          <div className="note-panel-meta-left">
+            {isEditingArea ? (
+              <input
+                id={`task-area-${task.id}`}
+                className="header-edit-input header-edit-input-meta"
+                type="text"
+                value={draftArea}
+                onChange={(event) => setDraftArea(event.target.value)}
+                onBlur={submitArea}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    submitArea();
+                  }
 
-                if (event.key === 'Escape') {
-                  setDraftArea(task.squad);
-                  setIsEditingArea(false);
-                }
-              }}
-              autoFocus
-              aria-label={`Area for ${task.title}`}
-              title="Area"
-            />
-          ) : (
-            <button
-              type="button"
-              className="header-editable note-squad note-squad-meta"
-              onDoubleClick={() => {
-                if (canEdit) {
-                  setIsEditingArea(true);
-                }
-              }}
-              disabled={!canEdit}
-              title={canEdit ? 'Double-click to edit area' : 'Area'}
-            >
-              {task.squad}
-            </button>
-          )}
-        </div>
-        {isAdmin ? (
-          <div className="note-panel-meta-right">
-            {isEditingOwner ? (
-              <label className="note-owner note-owner-editor" htmlFor={`task-owner-${task.id}`}>
-                <OwnerIcon />
-                <>
-                  <input
-                    id={`task-owner-${task.id}`}
-                    className="header-edit-input header-edit-input-meta owner-edit-input"
-                    type="text"
-                    list={`task-owner-options-${task.id}`}
-                    value={draftOwner}
-                    onChange={(event) => setDraftOwner(event.target.value)}
-                    onBlur={submitOwner}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        submitOwner();
-                      }
-
-                      if (event.key === 'Escape') {
-                        setDraftOwner(task.assignee);
-                        setIsEditingOwner(false);
-                      }
-                    }}
-                    autoFocus
-                    aria-label={`Owner for ${task.title}`}
-                    title="Owner"
-                  />
-                  <datalist id={`task-owner-options-${task.id}`}>
-                    {teamMembers.map((member) => (
-                      <option key={member} value={member} />
-                    ))}
-                  </datalist>
-                </>
-              </label>
+                  if (event.key === 'Escape') {
+                    setDraftArea(task.squad);
+                    setIsEditingArea(false);
+                  }
+                }}
+                autoFocus
+                aria-label={`Area for ${task.title}`}
+                title="Area"
+              />
             ) : (
               <button
                 type="button"
-                className="header-editable note-owner note-owner-button"
+                className="header-editable note-squad note-squad-meta"
                 onDoubleClick={() => {
-                  if (canEditOwner) {
-                    setIsEditingOwner(true);
+                  if (canEdit) {
+                    setIsEditingArea(true);
                   }
                 }}
-                disabled={!canEditOwner}
-                title={canEditOwner ? 'Double-click to edit owner' : 'Owner'}
+                disabled={!canEdit}
+                title={canEdit ? 'Double-click to edit area' : 'Area'}
               >
-                <OwnerIcon />
-                <span>{task.assignee}</span>
+                {task.squad}
               </button>
             )}
           </div>
-        ) : null}
-      </div>
-      <div className="note-title-band">
-        <div className="note-title-content">
-          {isEditingTitle ? (
-            <input
-              id={`task-title-${task.id}`}
-              className="header-edit-input header-edit-input-title"
-              type="text"
-              value={draftTitle}
-              onChange={(event) => setDraftTitle(event.target.value)}
-              onBlur={submitTitle}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  submitTitle();
-                }
+          {isAdmin ? (
+            <div className="note-panel-meta-right">
+              {isEditingOwner ? (
+                <label className="note-owner note-owner-editor" htmlFor={`task-owner-${task.id}`}>
+                  <OwnerIcon />
+                  <>
+                    <input
+                      id={`task-owner-${task.id}`}
+                      className="header-edit-input header-edit-input-meta owner-edit-input"
+                      type="text"
+                      list={`task-owner-options-${task.id}`}
+                      value={draftOwner}
+                      onChange={(event) => setDraftOwner(event.target.value)}
+                      onBlur={submitOwner}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          submitOwner();
+                        }
 
-                if (event.key === 'Escape') {
-                  setDraftTitle(task.title);
-                  setIsEditingTitle(false);
+                        if (event.key === 'Escape') {
+                          setDraftOwner(task.assignee);
+                          setIsEditingOwner(false);
+                        }
+                      }}
+                      autoFocus
+                      aria-label={`Owner for ${task.title}`}
+                      title="Owner"
+                    />
+                    <datalist id={`task-owner-options-${task.id}`}>
+                      {teamMembers.map((member) => (
+                        <option key={member} value={member} />
+                      ))}
+                    </datalist>
+                  </>
+                </label>
+              ) : (
+                <button
+                  type="button"
+                  className="header-editable note-owner note-owner-button"
+                  onDoubleClick={() => {
+                    if (canEditOwner) {
+                      setIsEditingOwner(true);
+                    }
+                  }}
+                  disabled={!canEditOwner}
+                  title={canEditOwner ? 'Double-click to edit owner' : 'Owner'}
+                >
+                  <OwnerIcon />
+                  <span>{task.assignee}</span>
+                </button>
+              )}
+            </div>
+          ) : null}
+        </div>
+        <div className="note-title-band">
+          <div className="note-title-content">
+            {isEditingTitle ? (
+              <input
+                id={`task-title-${task.id}`}
+                className="header-edit-input header-edit-input-title"
+                type="text"
+                value={draftTitle}
+                onChange={(event) => setDraftTitle(event.target.value)}
+                onBlur={submitTitle}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    submitTitle();
+                  }
+
+                  if (event.key === 'Escape') {
+                    setDraftTitle(task.title);
+                    setIsEditingTitle(false);
+                  }
+                }}
+                autoFocus
+                aria-label={`Title for ${task.title}`}
+                title="Task title"
+              />
+            ) : (
+              <button
+                type="button"
+                className={`header-editable note-title ${titleToneClass}`}
+                onDoubleClick={() => {
+                  if (canEditTitle) {
+                    setIsEditingTitle(true);
+                  }
+                }}
+                disabled={!canEditTitle}
+                title={
+                  canEditTitle
+                    ? `Due ${formatFullDate(task.end)} • Priority ${task.priority} • Double-click to edit title`
+                    : `Due ${formatFullDate(task.end)} • Priority ${task.priority}`
                 }
-              }}
-              autoFocus
-              aria-label={`Title for ${task.title}`}
-              title="Task title"
-            />
-          ) : (
-            <button
-              type="button"
-              className={`header-editable note-title ${titleToneClass}`}
-              onDoubleClick={() => {
-                if (canEditTitle) {
-                  setIsEditingTitle(true);
-                }
-              }}
-              disabled={!canEditTitle}
-              title={
-                canEditTitle
-                  ? `Due ${formatFullDate(task.end)} • Priority ${task.priority} • Double-click to edit title`
-                  : `Due ${formatFullDate(task.end)} • Priority ${task.priority}`
-              }
-            >
-              {task.title}
-            </button>
-          )}
+              >
+                {task.title}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -452,7 +553,7 @@ export default function StickyNote({
           <input
             id={`task-blocked-${task.id}`}
             type="checkbox"
-            checked={task.blocked}
+            checked={Boolean(task.blocked)}
             disabled={!canEdit}
             onChange={(event) => onUpdate(task.id, { blocked: event.target.checked })}
             aria-label={`Blocked status for ${task.title}`}
@@ -463,7 +564,7 @@ export default function StickyNote({
           <input
             id={`task-milestone-${task.id}`}
             type="checkbox"
-            checked={task.milestone}
+            checked={Boolean(task.milestone)}
             disabled={!canEdit || task.status !== 'Completed'}
             onChange={(event) => onUpdate(task.id, { milestone: event.target.checked })}
           />
@@ -490,12 +591,11 @@ export default function StickyNote({
           <input
             id={`task-release-${task.id}`}
             type="text"
-            value={task.release}
+            value={task.release || ''}
             onChange={(event) => onUpdate(task.id, { release: event.target.value })}
             disabled={!canEdit}
             aria-label={`Release for ${task.title}`}
             title="Release"
-            placeholder="24.4"
           />
         </div>
       </div>
@@ -504,7 +604,7 @@ export default function StickyNote({
         <input
           id={`task-bug-url-${task.id}`}
           type="url"
-          value={task.bugUrl}
+          value={task.bugUrl || ''}
           onChange={(event) => onUpdate(task.id, { bugUrl: event.target.value })}
           disabled={!canEdit}
           placeholder="Bug or Jira URL"
@@ -530,14 +630,24 @@ export default function StickyNote({
           <span>{sortedComments.length}</span>
         </div>
 
+        <textarea
+          id={`task-comment-draft-${task.id}`}
+          value={task.draftComment || ''}
+          onChange={(event) => onCommentDraftChange(task.id, event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              submitComment();
+            }
+          }}
+          placeholder="Type an update and press Enter to add it."
+          aria-label={`Add comment for ${task.title}`}
+          title="Add comment"
+        />
+
         <div className="comments-list" aria-label={`${task.title} recent comments`}>
           {recentComments.length ? (
-            recentComments.map((comment) => (
-              <article key={comment.id} className="comment-item">
-                <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
-                <p>{comment.text}</p>
-              </article>
-            ))
+            recentComments.map((comment) => renderComment(comment))
           ) : (
             <p className="muted-text">No comments yet.</p>
           )}
@@ -563,30 +673,14 @@ export default function StickyNote({
                 id={`comment-history-${task.id}`}
                 className="comments-history"
                 aria-label={`${task.title} comment history`}
+                ref={commentHistoryRef}
               >
                 <div className="comments-history-heading">Comment history</div>
-                {historyComments.map((comment) => (
-                  <article key={comment.id} className="comment-item comment-item-history">
-                    <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
-                    <p>{comment.text}</p>
-                  </article>
-                ))}
+                {historyComments.map((comment) => renderComment(comment, true))}
               </div>
             ) : null}
           </>
         ) : null}
-
-        <textarea
-          id={`task-comment-draft-${task.id}`}
-          value={task.draftComment}
-          onChange={(event) => onCommentDraftChange(task.id, event.target.value)}
-          placeholder="Type an update and it will autosave while you write."
-          aria-label={`Add comment for ${task.title}`}
-          title="Add comment"
-        />
-        <button type="button" className="ghost-button" onClick={submitComment}>
-          Add comment
-        </button>
       </section>
     </article>
   );

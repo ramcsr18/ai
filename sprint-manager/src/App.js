@@ -285,6 +285,28 @@ function Dashboard() {
     });
   };
 
+  const updateComment = (taskId, commentId, nextText) => {
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask || !canUserAccessTask(user, currentTask)) {
+      return;
+    }
+
+    const trimmedText = nextText.trim();
+
+    if (!trimmedText) {
+      return;
+    }
+
+    const nextComments = currentTask.comments.map((comment) =>
+      comment.id === commentId ? { ...comment, text: trimmedText } : comment
+    );
+
+    void updateTask(taskId, {
+      comments: nextComments,
+    });
+  };
+
   const addTask = async (event) => {
     event.preventDefault();
 
@@ -642,6 +664,7 @@ function Dashboard() {
           onTaskUpdate={updateTask}
           onCommentDraftChange={updateCommentDraft}
           onCommentAdd={addComment}
+          onCommentUpdate={updateComment}
         />
       </section>
     </main>

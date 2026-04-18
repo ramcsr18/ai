@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import StickyNote from './StickyNote';
 import { STAGES } from '../data/seedData';
 import { shouldDisplayTask, sortTasksForStage } from '../utils/taskUtils';
@@ -12,7 +13,9 @@ export default function KanbanBoard({
   onTaskUpdate,
   onCommentDraftChange,
   onCommentAdd,
+  onCommentUpdate,
 }) {
+  const [activeTaskIds, setActiveTaskIds] = useState({});
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
   const displayableTasks = tasks.filter((task) => shouldDisplayTask(task));
@@ -48,12 +51,39 @@ export default function KanbanBoard({
     }
   };
 
+  useEffect(() => {
+    setActiveTaskIds((current) => {
+      const next = {};
+      let hasChanges = false;
+
+      STAGES.forEach((stage) => {
+        const stageTasks = sortTasksForStage(
+          visibleTasks.filter((task) => task.status === stage)
+        );
+        const currentActiveTaskId = current[stage];
+        const hasCurrentActiveTask = stageTasks.some((task) => task.id === currentActiveTaskId);
+        const nextActiveTaskId = hasCurrentActiveTask
+          ? currentActiveTaskId
+          : stageTasks[0]?.id || null;
+
+        next[stage] = nextActiveTaskId;
+
+        if (nextActiveTaskId !== currentActiveTaskId) {
+          hasChanges = true;
+        }
+      });
+
+      return hasChanges ? next : current;
+    });
+  }, [visibleTasks]);
+
   return (
     <div className="kanban-container" aria-label="Sprint task board">
       {STAGES.map((stage) => {
         const stageTasks = sortTasksForStage(
           visibleTasks.filter((task) => task.status === stage)
         );
+        const activeTaskId = activeTaskIds[stage] || stageTasks[0]?.id || null;
 
         return (
           <section
@@ -80,6 +110,7 @@ export default function KanbanBoard({
                   <StickyNote
                     key={task.id}
                     task={task}
+                    isActive={task.id === activeTaskId}
                     stackIndex={index}
                     stackDepth={stageTasks.length}
                     isAdmin={user?.role === 'admin'}
@@ -88,10 +119,17 @@ export default function KanbanBoard({
                     onUpdate={onTaskUpdate}
                     onCommentDraftChange={onCommentDraftChange}
                     onCommentAdd={onCommentAdd}
+                    onCommentUpdate={onCommentUpdate}
                     onDragStart={(event) => {
                       event.dataTransfer.setData('text/plain', task.id);
                       event.dataTransfer.effectAllowed = 'move';
                     }}
+                    onActivate={() =>
+                      setActiveTaskIds((current) => ({
+                        ...current,
+                        [stage]: task.id,
+                      }))
+                    }
                     stageOptions={STAGES}
                   />
                 ))

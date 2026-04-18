@@ -1,0 +1,2280 @@
+{
+  "tasks": [
+    {
+      "title": "Clean up of ATGPF fmwtools xml before extraction",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "JDOM Changes Testing on the 26.07E label",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Run on the latest changes"
+      ]
+    },
+    {
+      "title": "TO VERIFY THE 26.07 FMW-SOURCED TPP JAR UPGRADES IN DOT P4FA LABEL PATCHES4FA_FMW14.1.2.24_PLATFORMS_260306.1846.3.S",
+      "status": "COMPLETED",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=39113588",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Updated to Sandhya and closed",
+        "03/23 - Jackson Annotations 2.21 verification complete"
+      ]
+    },
+    {
+      "title": "CREATE A SCRIPT TO GENERATE A UNIQUE LIST OF /FATOOLS TPP JAR REFERENCES FROM NON-TEST FA V2MIB FILES ( ADF_LIBRARY_DEPENDENCIES.LIBRARY)",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=39113664",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Report generation is in progress",
+        "03/30 - Report shared with Subha/FA team and script changes are in progress",
+        "03/23 - Create list of unique jars"
+      ]
+    },
+    {
+      "title": "Update the current label in the json",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/23 - Waiting for the Subha to confirm on the release",
+        "03/02 - Create separate bug"
+      ]
+    },
+    {
+      "title": "Fallback support when unable to download from TPP",
+      "status": "INGESTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 - Fallback is not required now, will revisit",
+        "03/23 - Create document with proposal and review with Subha"
+      ]
+    },
+    {
+      "title": "FATOOLS Third Party Product (TPP) JARs Download During the Label Build",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/FREINGES-95",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Got tracking bugs from Adit and Jun",
+        "03/23 - Jun has to update FA teams",
+        "03/16 - Talk to Subha and create separate Jira/ER for other team changes",
+        "03/02 - Working with family teams and stabilizing",
+        "02/23 - Created FREINGES ticket"
+      ]
+    },
+    {
+      "title": "DB Audit Checks for SQL (Confirm with Jon)",
+      "status": "COMPLETED",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/27 - Created a new bug for DB Dev team"
+      ]
+    },
+    {
+      "title": "NGFABS UI - Provide Option to Download FATOOLS TPP JAR Reports from the New Reports Section | NGFABS UI - Provide Option to Download FATOOLS TPP JAR Reports from the New Reports Section",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "Mar-A | Mar-B",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/FABSCICD-4114",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Still waiting for the confirmation on the production roll-out",
+        "03/30 - QA is tested and yet to be rollout to production",
+        "03/23 - Last week Mar is ETA",
+        "03/16 - Created child bug to Ops team",
+        "02/23 - Assigned Jira to Rama"
+      ]
+    },
+    {
+      "title": "Enh 38775640 - ENABLE INVOCATION OF INCREMENTALBUILD TARGET FOR UPGRADE FEATURE TRANSACTION FILES",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "TBD",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 - Waiting for PMC",
+        "03/23 - Waiting for PMC team",
+        "03/16 - Awaiting PMC team changes for testing",
+        "02/23 - Conclusion is to use the incrementalBuild and sent mail to PMC",
+        "02/16 - Need to discuss with PMC team to finalize the target",
+        "01/27 - Dependency on 38890406",
+        "11/19 - PMC Bug"
+      ]
+    },
+    {
+      "title": "Register TPP Libraries for Bootstrap",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - jakarta activation api used instead of jakarta activation",
+        "03/02 - SCM Family team will be registering jakarta activation as 4PP along with OCI SDK 3.80.1 2607. FRE will add a usage family",
+        "01/27 - Register as usage family and create a new Java Activation library"
+      ]
+    },
+    {
+      "title": "TPP Scope Management Tool",
+      "status": "ANALYSIS",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "ADE to GIT",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "FATOOLS TPP Library slap scan | Enh 38924128 - ENHANCE SLAP SCAN INTEGRATION FOR THIRD-PARTY JARS IN FATOOLS LABEL BUILD",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - Still waiting for confirmation",
+        "02/23 - Waiting for confirmation",
+        "02/16 - Created tacking bug and waiting for confirmation from Aravindan",
+        "01/27 - Still under review by Harish/Aravindan",
+        "01/19 - Internal review is still in progress",
+        "01/06 - Sent email for finalizing the approach",
+        "12/22 - Waiting for Harish to comeback",
+        "12/02 - Option B3 TPP to provide a new API",
+        "11/24 - Testing with Dev URL"
+      ]
+    },
+    {
+      "title": "FABUILDTOOLS TPP Library Change",
+      "status": "INGESTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34780504"
+    },
+    {
+      "title": "JDom Changes | FABUILDTOOLS - JDOM TPP Dependencies",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "26.04B?? | 26.07B",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/10 - On hold, dependency on PFCORE",
+        "10/13 - Round 2 testing is complete and X86 CPF is CLEAN and ARM64 getting C failure due to hardware issue. Heads-up to QA team",
+        "09/06 - Label and CPF jobs are successful",
+        "09/22 - Raghu changes are complete and need to review file by file"
+      ]
+    },
+    {
+      "title": "FATOOLS - TPP Library Changes | FATOOLS Third Party Product (TPP) Jars Download during the label build",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/24 - Check with Subha on the plan",
+        "10/13 - Shared test projects with Subha/Team.",
+        "09/22 - Need to get the unique list and share with Subha/Harish",
+        "08/18 - Next meeting is on 08/18",
+        "08/11 - Jun created a bug for TA and 08/15 is ETA",
+        "07/28 - yet to review the feedback and next meeting is on 5th Aug",
+        "07/22 - Initial Design document is complete and meeting setup for tonight",
+        "07/14 - Create design document and POC",
+        "06/30 - Scheduled meeting on 07/08",
+        "06/23 - Meeting is setup with Subir",
+        "06/09 - Analysis is in progress and setup a meeting with Subir/Subha"
+      ]
+    },
+    {
+      "title": "Build - Enhancements and New ideas",
+      "status": "INGESTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "Validate Manifest against P4FA | TO PIN THE P4FA DOT LABEL PATCHES4FA_FMW14.1.2.24_PLATFORMS_250310.1218.7.S TO THE FATOOLS_PT.V2MIBTPPMAINT2507B_LINUX | TO PIN THE P4FA DOT LABEL PATCHES4FA_FMW14.1.2.24_PLATFORMS_250310.1218.7.S TO THE FUSIONAPPS_PT.V2MIBTPPMAINT2507B_LINUX.X64",
+      "status": "PRODUCTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=37773156",
+      "relatedLinks": [
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=37773627"
+      ],
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/06 - PATCHES4FA_FMW14.1.2.24_PLATFORMS_251212.1803.5.S validated",
+        "06/30 -PATCHES4FA_FMW14.1.2.24_PLATFORMS_250606.1631.5.S",
+        "Validated and certified",
+        "06/16 - Found issue with PATCHES4FA_FMW14.1.2.24_PLATFORMS_250523.1931.1.S and Sandhya will provide new one this week",
+        "04/01 - Got new P4FA",
+        "03/24 - Waiting for new .dot label",
+        "03/17 - New P4FA dot label will be delivered today"
+      ]
+    },
+    {
+      "title": "Removal of ldapjclnt11.jar library from FUSIONAPPS and AUX branches | Removal of ldapjclnt11.jar references | FABUILDTOOLS | REMOVAL OF LDAPJCLNT11.JAR REFERENCES IN THE FABUILDTOOLS V2MIB",
+      "status": "INGESTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "Nov | Dec | Jan",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=37279288",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/23 - Need to follow with Chalpathi and share confluence with family",
+        "12/09 - Confirm with Chalapathi",
+        "11/18 - Need to be merged post cutover",
+        "11/04 - Removed in orahub and label is CLEAN. Need to test in 14c BLD1",
+        "10/17 - Post cut over"
+      ]
+    },
+    {
+      "title": "FMW14C - Scan FA Code with JDK21 - SCQS | SQ 9.9.1 Upgrade Runbook for FA-FRE",
+      "status": "INGESTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "Nov | Dec",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/16 - FATOOLS is in progress and FUSIONAPPS is complete",
+        "12/23 - Workspace with special chars, report not generated. And FATOOLS issue with slash",
+        "12/09 - SCM Family is taking longer to run",
+        "12/02 - Is in progress and some families are complete and removed the timeout",
+        "11/18 - Need to retest after creating expired view",
+        "11/04 - Need to change JDK to 17",
+        "10/21 - Upgraded to 9.1 SCQS, review mail issue and upgrade to jdk21 ruleset",
+        "10/17 - Working with Sriram's team"
+      ]
+    },
+    {
+      "title": "TPP Library 3PP and 4PP in fatpJarInformation.xml",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "Jan",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "06/09 - Will discuss after Satish is back",
+        "05/19 - Talk to Satish and do analysis",
+        "02/24 - Mallik to review with Harish and get back",
+        "01/16 - Have dependency on design",
+        "12/23 - As xml files are merged, will start working on it",
+        "12/09 - Will work after merging of xml is complete and rollout",
+        "12/02 - Need to retest after fix",
+        "11/18 - Got fix from TPP application",
+        "11/04 - Ram to follow-up with Krishna",
+        "10/28 - Sent a reminder email",
+        "10/21 - Getting .json extension for 3 jars in API response",
+        "10/17 - Post cover will show demo to Harish",
+        "08/20 - Mallik is following up with Harish",
+        "07/08 - Need to register new alternate jars for noship",
+        "07/01 - Demo with new changes for TPP libraries for 12C",
+        "05/20 - Got updated API's and testing is in progress",
+        "05/06 - Krishna will provide the change in API in Mid May",
+        "04/08 - Had a call with Krishna and waiting for confirmation",
+        "04/01 - Setup a call with Harish/Krishna",
+        "03/18 - No changes at the moment",
+        "03/12 - Waiting for the feedback",
+        "02/26 - Waiting for feedback on the approach",
+        "02/19 - Applies to only FMW14c",
+        "02/13 - Mallik is reviewing with Subha",
+        "02/05 - Analysis is in progress",
+        "01/22 - Analysis is in progress"
+      ]
+    },
+    {
+      "title": "Identify TPP jars and usage in different families | Family-level Extension Libraries ( TPP Jars ) Audit Report",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/06 - Send reminder mail to Satish",
+        "01/06 - Send reminder email to Satish",
+        "12/23 - Waiting for feedback on option to show codesearch links",
+        "12/09 - Setup another meeting with Satish and ER for FABS",
+        "10/21 - Setup a meeting",
+        "10/17 - Adding more filters . Schedule meeting with Subha next week and get feedback",
+        "09/09 - Work in in progress for the corner case",
+        "09/02 - Need to work on the corner case",
+        "08/26 - Corner case found for concrete and manifest jars of fmwtools",
+        "08/20 - In progress",
+        "08/08 - Report generation is in progress",
+        "07/22 - Working on generating the report for extension library references",
+        "07/15 - Using Visitors for parsing jpr/jws and extract the library dependencies",
+        "07/08 - Need to work on different approach",
+        "07/01 - Work in progress",
+        "05/20 - Not yet started",
+        "04/22 - Check the SharedLib java and reuse logic to calculate usage families",
+        "04/08 - Yet to get the details for usage_families attribute from TPP",
+        "04/01 - Working on a POC and waiting for confirmation on the usage_families from TPP",
+        "03/18 - Change the logic to consume families list from response",
+        "03/12 - Meeting postponed to this week",
+        "03/04 - Still waiting for review",
+        "02/26 - New approach shared with Mallik, waiting for review with Subha/harish",
+        "02/19 - Analysis is in progress"
+      ]
+    },
+    {
+      "title": "FMW14 | Clean up 11G",
+      "status": "DEVELOPMENT",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "24.04B | 24.07B/C??",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/05 - Chalapathi asked to wait",
+        "01/08 - Check the effort and identify the milestone",
+        "11/28 - Check and review the changes",
+        "09/25 - In progress",
+        "09/19 - Will resume again",
+        "09/04 - Started the cleanup",
+        "08/28 - Chalapathi will check with Aravindan and confirm",
+        "08/21 - Rebranched orabub branches",
+        "07/31 - Still on the back burner",
+        "07/18 - Will check with Chalapathi for the target milestone",
+        "07/03 - Analysis is in progress and need to talk to Chalapathi",
+        "06/19 - Will start after the TPP bug",
+        "06/12 - Analysis need to be done"
+      ]
+    },
+    {
+      "title": "TPP Jars for FABUILDTOOLS | Enh 34780418 - CLEAN UP FUSIONPPS BUILD FRAMEWORK CODE (Remove noship also) | Enh 34780504 - TOOL/FRAMEWORK TO DOWNLOAD TPP JARS INTO FABUILDTOOLS",
+      "status": "INGESTION",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "05/03 - On hold as we need to complete FATP jar violations first",
+        "03/08 - End of March",
+        "02/27 - Moved to lib folder around 17 jars",
+        "02/13 - EOM is the ETA for the new API changes",
+        "01/30 - Send reminder email to Harish/Krishna",
+        "01/20 - More jars are registered and waiting for bulk api",
+        "01/09 - Need to review current logic",
+        "01/02 - Able to download 4 jars"
+      ]
+    },
+    {
+      "title": "Ant Dependency Graph Generation POC",
+      "status": "ANALYSIS",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "Apex Support for Manifest Files",
+      "status": "ANALYSIS",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "L2L Patch UI using Helidon and OJet??",
+      "status": "ANALYSIS",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "Helix++ (2.0)",
+      "status": "ANALYSIS",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "Tool for Graph consistency",
+      "status": "ANALYSIS",
+      "assignee": "Raghavendra Kristam",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/6 - Had a initial discussion with Vaibhav",
+        "10/31 - Had an internal discussion"
+      ]
+    },
+    {
+      "title": "Support | Spectra CI/CD | Helix NLS",
+      "status": "PRODUCTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium"
+    },
+    {
+      "title": "ASCII testing on the customer issues",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/13 - No update from Joan",
+        "01/08 - Joan is doing the testing",
+        "12/11 - Dev is in progress",
+        "12/05 - Testing is pending with production series",
+        "11/20 - Jira to be created"
+      ]
+    },
+    {
+      "title": "Spectra Integration Testing | ITS | https://confluence.oraclecorp.com/confluence/display/fai18n/TSS-+Darwin+Integration+Test+Suite+%28ITS%29+for+Translate+step",
+      "status": "DEVELOPMENT",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "?? | Apr-A",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRACICD-18082",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Had a call with Satish and requested to add more cases",
+        "03/30 - Added 20 cases and MR will be raised",
+        "03/16 - Created sample test cases and working on real cases",
+        "03/02 - Analysing the changes required",
+        "02/23 - Waiting for the documentation",
+        "02/16 - Kick-off"
+      ]
+    },
+    {
+      "title": "Helix RL Re-trigger | Real Language FAOH Rebuild Support | Tracking- RL Rebuild ERs and Bugs",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/24 - Satish to comeback after talking to Subha on the Retrigger plan",
+        "11/10 - Dev testing is in progress",
+        "07/28 - FAOH stage is failing",
+        "07/07 - Draft will be ready by EOD"
+      ]
+    },
+    {
+      "title": "REST Service for NLS Telemetry",
+      "status": "DEVELOPMENT",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - Waiting for confirmation from Subha on the Technology",
+        "02/23 - Ask Satish to create ingestion",
+        "04/01 - Response confirmation"
+      ]
+    },
+    {
+      "title": "NLS Rules Migration to Code Scan",
+      "status": "DEVELOPMENT",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/07 - Send with queries and waiting for James Reply",
+        "04/01 - Busy with other tasks",
+        "02/24 - Going through the Code Scan docs"
+      ]
+    },
+    {
+      "title": "<Internal> TSS- Create a script to parse fabs getProjectsConfiguration api response for translate step metrics - FABS getProjectsConfiguration api- issue with \"filterBySteps\" Open - Filter Issue | Support for SPECTRA type in FABS API",
+      "status": "DEVELOPMENT",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "24 Jun 2024 | ??",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRACICD-9071",
+      "relatedLinks": [
+        "https://jira.oraclecorp.com/jira/browse/FABSCICD-2284",
+        "https://jira.oraclecorp.com/jira/browse/SPECTRACICD-9039"
+      ],
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Updating the confluence page with new changes",
+        "03/30 - Review and prepare the doc on the FABS API",
+        "03/16 - Check with FABS team and update the JIra with new contact",
+        "01/27 - Setup meeting with FABS team and follow-up with Satish",
+        "12/30 - Still pending with FABS, setup a meeting",
+        "12/09 - Follow up with FABS team",
+        "11/18 - Satish will talk to FABS team",
+        "11/04 - Follow-up with FABS team",
+        "08/20 - No update from FABS team",
+        "07/29 - No updates from FABS team",
+        "07/15 - Having issues with FABS API Filters, created Jira and not a blocker dashboard",
+        "07/08 - Shared with Sanjay and waiting for feedback",
+        "06/24 - Script is done and will be shared with Satish",
+        "06/20 - Only for Satish"
+      ]
+    },
+    {
+      "title": "Enh 36855607 - HELIX NLS: PERFORM EARLY CHECK FOR INCBLDTRANSACTIONS.XML DURING INCREMENTAL PSEUDO TRANSLATIONS BUILD FLOW",
+      "status": "COMPLETED",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "25.01B | 25.01C",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/09 - Update and close",
+        "08/08 - On target for C",
+        "07/29 - Need to raise the MR",
+        "07/22 - Waiting for ARU Fix"
+      ]
+    },
+    {
+      "title": "NLS Telemetry Data into Apex | getProjectsConfiguration API",
+      "status": "DEVELOPMENT",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "??",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/04 - Follow-up with FABS team",
+        "09/02 - Will work on this week",
+        "07/22 - FABS API is not a blocker, continue the dashboard design",
+        "07/15 - Working on Apex Dashboard",
+        "06/20 - Setup a meeting with Satish next Tuesday",
+        "05/13 - Test with different inputs for the API",
+        "06/03 - Work on finalizing the requirements and create HLD",
+        "06/03 - Work on finalizing the requirements and create HLD",
+        "05/30 - Validated FABS REST API",
+        "05/14 - Create confluence with your Analysis",
+        "05/09 - FABS API is working and need to analyse and design",
+        "03/12 - Ram to share the docs on Apex"
+      ]
+    },
+    {
+      "title": "ODA Translation Support",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/14 - Waiting for Satish to get back with requirements"
+      ]
+    },
+    {
+      "title": "TSS | Rules Engine",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/14 - Working on other priority tasks",
+        "09/19 - No further discussions due to other priority tasks",
+        "08/07 - Will be taken after Hetero",
+        "07/24 - Migrating more validations to the new rules engine",
+        "07/18 - Migrated some of existing validations to the new rules engine",
+        "06/19 - Migrate existing validation to new framework",
+        "Darwin doesn't support branching",
+        "05/30 - Analysis is done and basic framework is done."
+      ]
+    },
+    {
+      "title": "Artifactory Seed Metadata for Each Release",
+      "status": "PRODUCTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "Release",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/08 - 24.07 metadata need to uploaded",
+        "03/08 - 24.xx is complete and QA is in progress",
+        "02/13 - Repeat every release and see if we can automate"
+      ]
+    },
+    {
+      "title": "RBSR Sync | RBSRSync.sh save console output to a file and return as part of rest api response. | RBSRSYNC REST SERVICE: POC- ORCHESTRATE CAPTURE OF OUTPUT FILE/CONSOLE/RETURN CODES/LOG REPORT FILES 15 - Enhancement Req. Internal(Oracle) Review | RBSRSYNC REST SERVICE: POC- VALIDATE AND COMPARE RESPONSES FROM REST SERVICE AND STANDALONE TOOL 15 - Enhancement Req. Internal(Oracle) Review - PENDING DECISION | RBSRSync - Rest API",
+      "status": "DEVELOPMENT",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "Jun A | ?? | 29 Feb 2024 | 15 Mar 2024 | 26 Apr 2024 | 07 Jun 2024 | 07 Jun 2024 | 24 Jun 2024",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=36752521",
+      "relatedLinks": [
+        "https://jira.oraclecorp.com/jira/browse/FAI18N-501",
+        "https://jira.oraclecorp.com/jira/browse/FAI18N-500"
+      ],
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/30 - Latest enhancements from Sanjay and host in a cluster",
+        "11/04 - Get a closure on this",
+        "08/20 - Follow-up with Sanjay/Satish",
+        "07/15 - Review is pending",
+        "06/24 - Still working on the Console log file",
+        "06/03 - Log File to be included in the API response",
+        "06/03 - Log File to be included in the API response",
+        "05/30 - Follow-up with Satish, feed back to redirect output to different file",
+        "05/14 - Still waiting for review",
+        "05/09 - End point shared with Satish/Team.",
+        "04/08 - Helidon Limitation to access the URL from outside",
+        "04/01 - Confluence is created and need to review with Srini",
+        "03/04 - Dev part will be completed by tomorrow",
+        "03/04 - Reviewed with Sanjay/Satish. More functionalities to be implemented.",
+        "02/19 - On track and in progress",
+        "02/13 - Setup meetings and fix issues, Demo by 21 Feb 2024",
+        "01/08 - Check with Sanjay and target before holidays",
+        "11/14 - Reprioritise",
+        "09/25 - Setup a call with Satish and identify the VM to deploy",
+        "08/07 - Changes are complete and waiting for QA",
+        "07/24 - In back burner and hetero takes priority",
+        "07/18 - Waiting for some decision where to deploy and maintenance",
+        "06/19 - Service is complete and waiting for VM"
+      ]
+    },
+    {
+      "title": "NLS and Spectra NLS | Resource Bundle Checks",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium"
+    },
+    {
+      "title": "GTS",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "release": "??",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRACICD-3207",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "10/31 - Follow-up with Satish",
+        "Yet to get more details from Saitsh",
+        "Thirdparty jar from WPTG team"
+      ]
+    },
+    {
+      "title": "GTS | SPECTRARLTSS: INTERNAL- REPLACE NEW FILE() REFS WITH BUILDCONTEXT APIS Closed - ON HOLD",
+      "status": "INGESTION",
+      "assignee": "SURI BABU KONDA",
+      "area": "NLS",
+      "priority": "Medium",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRACICD-3091"
+    },
+    {
+      "title": "TPP Requests | gatling - 3.15.0 | sparksql - 3.5.8",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "Webcat KT and Patching",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Doing hands-on"
+      ]
+    },
+    {
+      "title": "SKUMAP Automation and Email Notification",
+      "status": "COMPLETED",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - NO more changes required",
+        "03/30 - Follow-up with Krishna",
+        "03/23 - Changes are complete and waiting for Krishna",
+        "03/16 - Krishna to send the DL for config",
+        "03/02 - File names in the email body, check with Krishna",
+        "02/23 - Krishna changes are being worked on",
+        "02/16 - Email notification is complete and working on Krishna changes"
+      ]
+    },
+    {
+      "title": "Slow incremental build performance improvement proposal Development - Incremental Build Optimisation | Profiling and optimization for writeGraph and incrementalBuild ant targets",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "26.04E? | 26.07B | 26.10B",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/FREINGES-31",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 - Complete sanity and raise MRs on 26.10B",
+        "03/30 - Moved to 26.10B milestone",
+        "03/16 - Testing is complete. Need to setup a meeting",
+        "03/02 - Incr and NI label CLEAN. Bulk Transaction INCR label is DIRTY",
+        "02/23 - Labels are failing and trigger again with new series (may be ADE issue)",
+        "02/16 - Cache changes causing OOM.",
+        "11/22 - Create a page with strategy"
+      ]
+    },
+    {
+      "title": "TPP KT: The failure and rare cases",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium"
+    },
+    {
+      "title": "FACACHE",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "26.04B??",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=37302987",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 - Check with Aravindan and close if not required",
+        "11/24 - Check with filer",
+        "11/10 - Setup meeting with filer and close",
+        "10/13 - Schedule a meeting",
+        "09/22 - Had a call with Aravindan"
+      ]
+    },
+    {
+      "title": "INTEGRATE FAOH VALIDATION TOOL INTO FAOH APP-UI INTEGRATION",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=33839287"
+    },
+    {
+      "title": "INTEGRATE FAOH VALIDATION TOOL INTO FAOH APP",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=33756383"
+    },
+    {
+      "title": "SUPPORT JAVA BUILDS ON ARM64 VM FOR INCREMENTAL BUILD",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=37998347"
+    },
+    {
+      "title": "SKUMAP - Change related to Bug DB",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "Aug | Sep",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "09/22 - Check if it is enabled in production"
+      ]
+    },
+    {
+      "title": "FAOH | Jenkin Job for FAOH Validation",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "26.01B",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "09/22 - Create bug"
+      ]
+    },
+    {
+      "title": "FAOH | Purge Script Phase-2",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "26.01B | 26.01C"
+    },
+    {
+      "title": "OPTIMIZE HELIX DOWNLOAD SPEED Using Checksum",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/04 - Create ER"
+      ]
+    },
+    {
+      "title": "ER 34900667 - ANTPARALLELBOOTSTRAPDOPSEUDOTRANSLATION",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "23.10B | 23.10D | 23.10E | 24.01B?? | 24.10D | 25.01B | 25.04C | ??",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/30 - Need to discuss with Sandhya on existing framework",
+        "12/23 - Setup a meeting with Sandhya",
+        "12/16 - Schedule a meeting with Sandhya",
+        "11/18 - Scheduled meeting with Aravindan",
+        "10/17 - Label build times increased with new changes, investigation is in progress",
+        "09/02 - Not working now due to other tasks",
+        "07/01 - Working on it",
+        "05/06 - Need to make the changes",
+        "04/29 - Had a call with Aravindan/Danny/Chalapathi. Come up with new proposal and review",
+        "04/08 - Schedule meeting with Aravindan and Danny",
+        "12/11 - Rescheduled the meting Danny",
+        "12/05 - Scheduled a meeting with RWS team",
+        "11/28 - Aravindan asked to schedule a meeting this week",
+        "11/20 - Review and check with Aravindan/Danny what is required",
+        "09/25 - Follow-up",
+        "09/19 - Need to follow-up",
+        "09/04 - Schedule meeting with Sandhya to discuss on the gradle 8.0 library",
+        "08/21 - Check the new Gradle 8.0 version",
+        "08/14 - Check with Aravindan and Danny",
+        "07/24 - Schedule another meeting by tomorrow",
+        "07/18 - Reviewing with Aravindan and Danny on 07/19",
+        "06/26 - Follow-up with Aravindan and Danny",
+        "06/12 - More testing is required and review is in progress by Aravindan",
+        "06/05 - Review changes with Aravindan",
+        "05/30 - Saving around 5 min and testing a case by inducing a failure",
+        "05/15 - Reviewed with Aravindan and Danny and had some more suggestions.",
+        "05/08 - Scheduled a meeting on Thu",
+        "05/03 - Setup a call with Aravindan/Danny and get clarifications on the approach",
+        "04/24 - Gradle worker API works but we need Gradle 8.x",
+        "03/27 - Talk to Aravindan",
+        "03/20 - Setup a call with Aravindan",
+        "03/08 - Discuss on the concern",
+        "02/27 - Still doing analysis",
+        "02/20 - Had discussion with Aravindan and will start working on a POC",
+        "02/13 - Setup a meeting with Aravindan",
+        "02/06 - Analyze the changes required and do a POC",
+        "01/20 - Review the changes required",
+        "12/26 - Work on POC to run gradle tasks in parallel and call ant target"
+      ]
+    },
+    {
+      "title": "Graph Dependency Validation Tool",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/20 - Due to other priority, not much progress",
+        "01/09 - Able to progress",
+        "01/02 - Got more dependencies in VO/EO scan and check with Nag",
+        "12/26 - XML class dependencies from VO/EO",
+        "12/19 - Working on generating the maps with metadata",
+        "11/21 - A new class for standalone",
+        "11/07 - Had a quick call to discuss about the tool"
+      ]
+    },
+    {
+      "title": "Graph Optimisation",
+      "status": "ANALYSIS",
+      "assignee": "Vimal Dwivedi",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "10/26 - Did some code walkthrough"
+      ]
+    },
+    {
+      "title": "Generic Accounts - SKUMAP",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/28 - New account created for stage and dev.",
+        "04/22 - Create SR for service accounts for stage and dev",
+        "04/07 - Ram to share the email on Generic accounts deprecation"
+      ]
+    },
+    {
+      "title": "POD SKU Integration with SKUMAP",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/28 - Shared the API request/response"
+      ]
+    },
+    {
+      "title": "TPP Requests | Introduction",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "TPP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/22 - Send the permission requests for TeamCity and Confluence"
+      ]
+    },
+    {
+      "title": "Ldap User/Email Conversion",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "23-Apr-25",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/28 - Creating the documentation for Krishna (production)",
+        "04/22 - Got client ID and secret and working on the changes",
+        "04/07 - Provided with temporary solution",
+        "02/17 - Work with Siva Team on the impact"
+      ]
+    },
+    {
+      "title": "Fusion Parts Depot December 2022 Sprint",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium"
+    },
+    {
+      "title": "Deployment of Pending Items",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/07 - Jar Mapping and Landing page is pending",
+        "02/10 - UAT Jira is down and should be available today"
+      ]
+    },
+    {
+      "title": "Create confluence page and document all the steps - User Guide",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "23-Apr-25",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/22 - updating with review comments"
+      ]
+    },
+    {
+      "title": "Hosting Backup/Restore as Service for Multiple Schemas/Applications -",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/10 - Meeting is rescheduled to today",
+        "12/16 - Got feedback from Apex team and may not possible to support multiple workspaces"
+      ]
+    },
+    {
+      "title": "ARM64 Build",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/10 - Created Jira to allocate secondary VM",
+        "12/16 - Need some changes for build.sh",
+        "06/17 - Able to create the view"
+      ]
+    },
+    {
+      "title": "Restore Workspace",
+      "status": "COMPLETED",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "15 Mar 2024 | 29 Mar 2024 | 24 May 2024 | 05 Jun 2024 | 05 Jun 2024",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/02 - Generic solution independent of workspace and Application",
+        "10/17 - Schedule meeting next week",
+        "09/02 - Setup a meeting on Wed for internal Demo",
+        "06/27 - Share the documentation",
+        "06/17 - Documentation is pending",
+        "06/03 - Testing is in progress",
+        "06/03 - Testing is in progress",
+        "05/30 - SKU/PART, and mapping and other testing is in progress",
+        "05/20 - Testing is in progress",
+        "05/06 - Review the xlsx format for DML",
+        "04/29 - Import DDL and issue resolved with ; and working on DML",
+        "04/08 - Having issue with import of non app files",
+        "03/18 - Having issues executing the multiple sql files from zip"
+      ]
+    },
+    {
+      "title": "Backup Functionality",
+      "status": "COMPLETED",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "31 Jan 2024 | 23 Feb 2024 | 13 Mar 2024",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/19 - Preflight Manager DB, Review GETDDL function and Multiple Schemas",
+        "12/28 - Backup and Restore analysis is in progress"
+      ]
+    },
+    {
+      "title": "OJet Sample Application",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/28 - Working on workflow and backend api to save files",
+        "11/20 - Demo in the afternoon",
+        "09/06 - Demo to Subha before Thu (11/09)"
+      ]
+    },
+    {
+      "title": "SKUMAP Microservices",
+      "status": "DEVELOPMENT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "09/04 - Get more details from Harish/Krishna",
+        "08/21 - Get more details from Krishna"
+      ]
+    },
+    {
+      "title": "SKU/PART Jar Mapping | SKUMAP SKU->JARS, PARTS ->JARS MAPPING.",
+      "status": "QA/UAT",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "Jul Sprint | Aug Sprint | Sep Sprint (09/27)",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/06 - Oyni is testing the changes",
+        "09/25 - Working on Map/Unmap and withdrawal",
+        "09/04 - Jar User and Jar Admin will be able to create the jars",
+        "08/21 - Changes and testing is complete and documentation is in progress",
+        "08/14 - Testing is in progress (EOD), jar search and SKU-JAR, PART-JAR. UNMAP functionality",
+        "07/24 - Editing and Approval workflow is complete and need to incorporate flag",
+        "07/18 - Working on workflow and mapping is next",
+        "06/26 - Send email to Krishna and waiting for feedback",
+        "06/19 - Initial draft requirements page is created and share with Krishna"
+      ]
+    },
+    {
+      "title": "NLS Inline Editing",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "06/19 - Check with Krishna if this still required"
+      ]
+    },
+    {
+      "title": "Non Secured REST API",
+      "status": "INGESTION",
+      "assignee": "Vimal Dwivedi",
+      "area": "SKUMAP",
+      "priority": "Medium",
+      "release": "Feb | Mar",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SKUMAP-38",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/27 - Krishna confirmed this Jira is not required. Update and close it.",
+        "12/26 - Krishna need to move to Dev"
+      ]
+    },
+    {
+      "title": "P1 Issue - 39170074",
+      "status": "COMPLETED",
+      "assignee": "Nagarjuna Pampati",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Issue with corrupted DO"
+      ]
+    },
+    {
+      "title": "Issue with onPOD API - Intermittent issues cloud meta",
+      "status": "INGESTION",
+      "assignee": "Nagarjuna Pampati",
+      "area": "ONPOD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Camden created Jira OCIFAPFLT-10816 - Proof of Concept: Ability to run SQL queries on a pod via API Open",
+        "03/23 - Jira need to be created",
+        "03/16 - Jira need to be created"
+      ]
+    },
+    {
+      "title": "Artifactory Authenticated Downloads for FABUILDTOOLS 38954653",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "BUILD",
+      "priority": "Medium",
+      "release": "25 Mar 2026 | 20 Mar 2026 | 10 Apr 2026",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Push our changes",
+        "03/23 - Testing including labels by Wed",
+        "03/16 - Had a meeting with build team and got feedback",
+        "02/16 - Analyze and discuss with all stakeholders"
+      ]
+    },
+    {
+      "title": "Slow incremental build performance improvement proposal",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "BUILD",
+      "priority": "Medium",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/FREINGES-31"
+    },
+    {
+      "title": "NO-QA Proof of Concept: Enable users to run SQL queries on a pod db Closed POC for Run SQL Query",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "ONPOD",
+      "priority": "Medium",
+      "release": "Sep | Oct | 26-Dec EOW | 8-Jan",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/OCIFAPFLT-9699",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - Need to create new Jira",
+        "03/16 - Need to work on this",
+        "02/16 - Got comments from Bob and Camden",
+        "11/27 - LCM Cred store to access RODS DB and Design is ready",
+        "11/03 - Design documentation is in progress and ETA is tomorrow",
+        "09/15 - Documentation by Wed"
+      ]
+    },
+    {
+      "title": "Data Mining for the Patching",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "ONPOD",
+      "priority": "Medium",
+      "release": "Jul?",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "06/09 - Setup meeting with Debraj this week",
+        "05/19 - Setup meeting with Debraj"
+      ]
+    },
+    {
+      "title": "Jira for isRODS POD Info API",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "ONPOD",
+      "priority": "Medium",
+      "release": "Apr | May?? | Jun ??",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "06/09 - Create Jira and follow-up",
+        "05/26 - Check with FABS team",
+        "05/19 - Check with FABS team"
+      ]
+    },
+    {
+      "title": "Flex Fields for Taxonomy | Analysis and Design - EOW",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "TAXONOMY",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/04 - Check with Siva",
+        "02/19 - Setup a meeting with Vimal and Ram",
+        "01/29 - Working prototype by tomorrow 01/30",
+        "01/08 - Initial analysis shared with Debraj/Ramesh. Prototyping is in progress",
+        "12/11 - Share the current analysis with Debraj/Team by 13 Dec 2023",
+        "11/20 - Send the status to Debraj",
+        "11/14 - Analysis in progress",
+        "11/06 - Syncup with Ramesh",
+        "10/30 - Analysis and Design is in progress."
+      ]
+    },
+    {
+      "title": "Taxonomy Demo Service Functionality",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "TAXONOMY",
+      "priority": "Medium",
+      "release": "07 Jun 2023 | 13 Jun 2023",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPTAXONOMY-306",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "10/30 - Review with Debraj/Ramesh",
+        "09/19 - Check with Debraj/Ramesh",
+        "07/24 - Changes are complete and no changes required",
+        "07/03 - Got some feedback from Debraj and Tanveer and create a confluence page",
+        "06/19 - Manual creation of the 2 demo instances created and shared with Debraj/Team. Waiting for the feedback.",
+        "06/12 - Will be done by EOD tomorrow",
+        "06/05 - Working on manual scripts and automation is difficult at this moment",
+        "05/22 - Demo service is the priority from Ramesh/Debraj.",
+        "12/06 - Ramesh told to lower the priority"
+      ]
+    },
+    {
+      "title": "Taxonomy Backup Functionality | Automation : P2T export and import table data. Resolved",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "TAXONOMY",
+      "priority": "Medium",
+      "release": "18-Nov | 16-Dec | 21-Dec",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPTAXONOMY-432",
+      "relatedLinks": [
+        "https://jira.oraclecorp.com/jira/browse/SPTAXONOMY-305"
+      ],
+      "commentsOrder": "newest-first",
+      "comments": [
+        "09/19 - If no further action items, close the Jiras",
+        "01/09 - Waiting for production roll-out",
+        "12/26 - Dev complete",
+        "12/19 - New ETA 21/Dec",
+        "12/06 - Had meeting last week with Ramesh and others. Dev is complete 12/09 and prod by 12/16",
+        "11/28 - Evaluating an existing tool from different team and also check with Debraj if this functionality is still required."
+      ]
+    },
+    {
+      "title": "Taxonomy Apex Admin Functionality | REST API to achieve the functionality | UI Functionality | Setup a meeting with Ramesh/Debraj",
+      "status": "DEVELOPMENT",
+      "assignee": "Nagarjuna Pampati",
+      "area": "TAXONOMY",
+      "priority": "Medium",
+      "release": "18-Nov | 21-Dec | 28-Dec",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPTAXONOMY-304",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "Review and close if no further action required",
+        "01/09 - Waiting for clarifications",
+        "12/26 - There is an issue while testing import and investigation is in progrss",
+        "12/19 - UI ETA is 21/Dec",
+        "12/06 - Rest API is complete and UI is pending",
+        "Sent mail to Ramesh/Debraj",
+        "Recording Shared",
+        "Kick-off meeting complete",
+        "Awaiting kick-off"
+      ]
+    },
+    {
+      "title": "Phase - I Design for Backend Services and Usecases | Seeding Automation UI - Detailed design & plan | Seeding Automation UI | Seeding Automation implementation | DB table to store request details and status. - PROGRESS | Jenkins job with params - PROGRESS | SeedCarbMetada service implementation - PROGRESS | UI with OJET - PROGRESS | Admin only access | Ability to re-run job after cleaning up data (for dev repo only) | Show seeding logs and reports",
+      "status": "INGESTION",
+      "assignee": "Nagarjuna Pampati",
+      "area": "TAXONOMY",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=33756309",
+      "relatedLinks": [
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34093753",
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34093782",
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34093825",
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=33839221",
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34093841",
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34093862",
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=34093877"
+      ],
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/06 - Confirmed with Sandya and is on HOLD due to other priority projects",
+        "11/28 - Send mail to Sandhya and close this",
+        "Creating the Schemas and DAO objects",
+        "Review with Sandhya and get final approval",
+        "Create JIRA project and check with Sandhya"
+      ]
+    },
+    {
+      "title": "Phase - II Design for Backend Services and Usecases | Seeding Automation UI",
+      "status": "INGESTION",
+      "assignee": "Nagarjuna Pampati",
+      "area": "TAXONOMY",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "Design the report generation"
+      ]
+    },
+    {
+      "title": "TPP requests completed from IDC",
+      "status": "INGESTION",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium"
+    },
+    {
+      "title": "Automate the TPP Build Tool as a Service",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium"
+    },
+    {
+      "title": "REST API for BA ID Info",
+      "status": "INGESTION",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 - Share the PLS doc and contact.",
+        "03/16 - Need contact info for PLS team",
+        "02/23 - Waiting for service from Krishna",
+        "11/22 - Scraping PLA app page for BA ID in Java"
+      ]
+    },
+    {
+      "title": "Create a new API - find shared library info",
+      "status": "COMPLETED",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/26 - QA is in progress",
+        "11/22 - Waiting for Krishna/Team to provide API"
+      ]
+    },
+    {
+      "title": "Internal - Parse POM.XML file and get the list of Third Party Artifacts/Modules (GAVs) and Dependency Fourth Party Artifacts/Modules (GAVs) for a given Product Name and Version Number. Open",
+      "status": "QA/UAT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "16-Sep-24",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRATPP-3204",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 - Discuss on the deployment",
+        "03/17 - Check with Suresh",
+        "03/04 - Create token permissions requested for image repository",
+        "02/06 - OCI repo created and unable to create auth token",
+        "12/09 - Dev complete and requested Krishna to test",
+        "11/04 - Reschedule the meeting",
+        "10/17 - Architecture Document updated and need to review with infra POCs",
+        "09/16 - Product and Version as input and URL as optional",
+        "09/12 - Shared the initial version",
+        "07/01 - Analysis is in progress"
+      ]
+    },
+    {
+      "title": "Migration from local mail/redis service to OCI native services",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "Dec",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "06/09 - If not required, close this",
+        "11/04 - Still working on it"
+      ]
+    },
+    {
+      "title": "TPP for Apex Backup",
+      "status": "INGESTION",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "07/24 - Connect with Nag",
+        "03/08 - Follow-up with Nag"
+      ]
+    },
+    {
+      "title": "Jar Comparison Algorithm",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "08 May 2024 | 14 May 2024 | 21 Jun 2024",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "10/17 - Development is complete and waiting for cluster for deployment",
+        "09/12 - Request for a Cluster",
+        "07/01 - Test today with new changes",
+        "05/27 - Handled more attributes",
+        "05/20 - Need to make a change Imported Packages MANIFEST.MF",
+        "05/14 - Almost complete and working on few MANIFEST attributes, xsd and xml",
+        "05/09 - Work in progress",
+        "05/06 -Slight deviation in the changes and ETA",
+        "04/29 - In progress and on target"
+      ]
+    },
+    {
+      "title": "Tool for XML validation and 4PP/3PP Existing Libraries",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium"
+    },
+    {
+      "title": "Docker image for the Service",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/12 - Dev is complete",
+        "02/05 - Got review comments and fixed",
+        "01/29 - Roll-out pending",
+        "01/22 - Service is complete and working"
+      ]
+    },
+    {
+      "title": "Apex UI for Jar Comparison",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "24 Nov 2023 | 14 Dec 2023 | 03 Jan 2024",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/26 - Scheduling is pending",
+        "02/19 - Remove hyperlink for NA",
+        "02/13 - Do the peer review with Vaibhav.",
+        "- NA no hyperlink",
+        "01/29 - Got links from Einstein and have issue with query parameter",
+        "01/22 - Check for alternatives to display null data with NO DATA",
+        "01/03 - ETA is today",
+        "12/11 - Review the issue with Ram and Vimal",
+        "11/28 - Due to https having issue with existing API, working on fixing the issue",
+        "11/20 - Work with Vimal",
+        "11/06 - Learning Apex and convert Json to Table",
+        "10/30 - Need to populate data from json",
+        "09/25 - Working with Adit and Vimal.",
+        "09/19 - Connected to Adit, having issue with passing data",
+        "09/04 - Check with Vimal"
+      ]
+    },
+    {
+      "title": "TPP/4PP ARTIFACTS VALIDATION/VERIFICATION BUILT BY THIRD PARTY AUTOMATION In Progress - MANIFEST.MF comparison",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "09 Jun 2023 | 16 Jun 2023 | 22 Jun 2023 | 18 Aug 2023 | 22 Aug 2023 | 30 Aug 2023 | 14 Dec 2023",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRATPP-704",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "05/30 - More work to be done on the text files",
+        "03/18 - MR created for all the changes and new algorithm and changes required",
+        "02/26 - Algorithm for comparison of jars need to be changed",
+        "01/22 - Document the unit test cases",
+        "11/06 - Waiting for UI changes",
+        "10/30 - Backend is completed and waiting for UI changes",
+        "09/25 - Separate jobs for jar comparison and BA comparison report and seems to be working",
+        "09/19 - Can we review the design",
+        "09/04 - Fixed the issue. Discuss with Krishna on the missing Maven jars and come up with solution",
+        "08/28 - Found an issue passing JSON between pages.",
+        "08/21 - Backend is complete and testing is in progress",
+        "08/14 - In progress",
+        "07/24 - Started on incremental",
+        "07/18 - Krishna asked to work on two approaches, incremental and full comparison",
+        "07/03 - Found an issue, some repos are taking longer to download. Need to work on solution after talking to Kishna and Harish",
+        "06/12 - Got some new TPP requests, so delayed",
+        "06/05 - Waiting for Token",
+        "05/30 - Logic to compare size and manifest version",
+        "05/15 - Reviewed and working on the logic to download the public jar",
+        "05/03 - Check with Krishna on latest status",
+        "02/20 - Shared details with Krishna and waiting for Harish reply",
+        "02/13 - Start creating a page with analysis and open items",
+        "02/06 - Comparison TPP jars with Maven central"
+      ]
+    },
+    {
+      "title": "TPP vs Artifactory Report. | TPP - IDC Tasks list#TPPtoArtifactoryReport:",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "05 Apr 2023 | 07 Apr 2023 | 08 May 2023 | 13 Dec 2023",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRATPP-1937",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/19 - Need to work on Algorithm for match",
+        "- Send Email is complete",
+        "- Sent List of Jars Used to Krishna",
+        "- Send URL instead of attachment",
+        "02/13 - Open Issues",
+        "- Send Email when token fails/expires",
+        "- Total count mismatch - OPEN",
+        "- List of jars used",
+        "- Schedule the report from Apex",
+        "- Unit Test Documentation - OPEN",
+        "12/11 - Working on Docker Image creation",
+        "09/19 - Responded to new comment from Ashish",
+        "08/28 - Review comments are implemented and sent mail to Krishna",
+        "05/15 - Review and approval is pending",
+        "05/08 - Dev is complete and Demo is pending",
+        "04/18 - No change",
+        "04/03 - APIs are completed and working on UI changes",
+        "03/27 - Working on individual tasks",
+        "03/20 - Making some progress",
+        "02/27 - Creating the requirement document",
+        "02/20 - Got the API but found issues. Waiting for the fix",
+        "02/06 - Waiting for the API"
+      ]
+    },
+    {
+      "title": "INTERNAL - VERIFY THE EXISTENCE OF ARTIFACTS BETWEEN ARTIFACTORY AND THIRD PARTY APPLICATION In Progress - TPP Report Services | TPP - IDC Tasks list",
+      "status": "DEVELOPMENT",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "02-Jan-23",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRATPP-711",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "05/15 - Review and approval is pending",
+        "05/03 - Check with Krishna on latest review status",
+        "04/24 - Got new VM and deployed Service and working. MR is pending",
+        "04/18 - MR is pending and UI integration is in progress",
+        "02/27 - Demoed to Harish and Team and will comeback with feedback if any",
+        "02/13 - Send reminder to Harish",
+        "02/06 - Waiting for the VM to deploy",
+        "01/20 - Add classifiers for artifactory query is complete and code need to be merged. Awaiting for other priority jira/ers",
+        "12/26 - Add classified in REST API and waiting for VM",
+        "12/13 - Also send reminder to Krishna/Harish on the VM for helidon",
+        "11/7 - Adding additional parameters is complete and added a cron job in helidon for daily report, attach json report to email",
+        "10/31 - Generate report API to support new parameters and email",
+        "10/26 - Sent the estimates and update the start/end dates",
+        "10/17 - Sending mail to the request and option to upload/send mail",
+        "10/12 - Demo to Harish/Krishna",
+        "9/20 - Estimate the remaining effort for the services"
+      ]
+    },
+    {
+      "title": "INTERNAL - VERIFY THE EXISTENCE OF ARTIFACTS BETWEEN ARTIFACTORY AND THIRD PARTY APPLICATION In Progress - TPP Apex",
+      "status": "COMPLETED",
+      "assignee": "Kisor Biswal",
+      "area": "TPP",
+      "priority": "Medium",
+      "release": "12-Dec | 02 Jan 2023 | ??",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/SPECTRATPP-711",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "08/28 - Krishna and team will do the integration.",
+        "05/15 - Review and approval is pending",
+        "05/03 - Check with Krishna and roll-out",
+        "02/20 - Follow-up with Krishna -Ram",
+        "01/20 - Dev is complete and demo is done. Roll-out Pending",
+        "12/26 - Demoed to Harish and got few comments",
+        "Add classifier to UI and REST API",
+        "12/13 - Issue with pagination and work with Vimal.",
+        "12/06 - Integration with REST API is in progress and resolving some issues",
+        "9/20 - Talk to Krishna for getting a VM to deploy the Helidon services"
+      ]
+    },
+    {
+      "title": "FA Local Containers 3.7.4 Bug/ER QA Testing Checklist",
+      "status": "INGESTION",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "OTBI",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "401 WSM Issue",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/02 - Dev changes are complete"
+      ]
+    },
+    {
+      "title": "Telemetry Email for Build",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Oct",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/16 - Issue is fixed and schedule the job",
+        "01/19 - Fix and schedule",
+        "10/03 - Build telemetry dashboard is getting data"
+      ]
+    },
+    {
+      "title": "REST API issue with new P4FA",
+      "status": "COMPLETED",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/02 - App specific issue and developer need to identify the missing flex fields",
+        "02/23 - New P4FA issue"
+      ]
+    },
+    {
+      "title": "ESS Job Schedule Issue",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/23 - Flex field dependency and table issue. Doing uPatch"
+      ]
+    },
+    {
+      "title": "App Composer Issue",
+      "status": "COMPLETED",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/02 - Create a ER for automatic role creation",
+        "02/23 - Create ER and automate new role creation"
+      ]
+    },
+    {
+      "title": "PRC (FA Family) Support on dockster Closed - PRC Support",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan | Feb",
+      "jiraUrl": "https://jira.oraclecorp.com/jira/browse/FREINGES-35",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/02 - Dev is complete",
+        "02/23 - VBCS and OSCS is resolved, API is not working",
+        "02/16 - Working on the ESS jobs for indexes",
+        "01/19 - VBCS Testing and OSCS",
+        "01/06 - Get timelines from PRC and QA",
+        "12/08 - Trigger job"
+      ]
+    },
+    {
+      "title": "Configure new Jenkins Instance up and running",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan"
+    },
+    {
+      "title": "37773747 ESSProC for FMW14C",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "SEP | Nov | Dec | Jan | Aug | Sep? | Oct? | Nov?",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/19 - Will continue work for this sprint",
+        "01/06 - Connect with Manveet (HCM)",
+        "07/28 - Ping Srikanth and review Helium commands",
+        "05/26 - Pinged filer, waiting for response",
+        "05/05 - Check with Piyush",
+        "04/28 - Created container and shared with Piyush",
+        "01/16 - Only x86 for this release",
+        "12/30 - Need to setup a meeting with FIN team",
+        "12/02 - Fin family team logged bug internally",
+        "10/21 - Family team need to make the changes",
+        "10/17 - Follow-up with family team",
+        "10/10 - Family teams need to make fix for 14c library references",
+        "10/03 - Reply to Janet"
+      ]
+    },
+    {
+      "title": "VBCS Support for FIN",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Sep | Oct? | Nov? | Jan",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/19 - CC Ram and follow-up",
+        "01/06 - Follow-up with FIN team",
+        "11/24 - Send email",
+        "09/25 - 500 error resolved and getting empty pages",
+        "09/22 - Connecting with Dev today"
+      ]
+    },
+    {
+      "title": "Create Local DB Image",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "Dashboard Changes",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "08/25 - Demo"
+      ]
+    },
+    {
+      "title": "Office Hours for FALCON",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Apr"
+    },
+    {
+      "title": "SCM Jobs and SILVER, 2504 and 2507",
+      "status": "INGESTION",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Aug | Sep?",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "07/28 - Need to follow-up."
+      ]
+    },
+    {
+      "title": "Design to create containers on user VMs",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "08/11 - Setup meeting with Ops team",
+        "08/04 - Need to configure the users",
+        "07/28 - Create confluence with design"
+      ]
+    },
+    {
+      "title": "Migrate from JSch and Apache Mina | https://pls.appoci.oraclecorp.com/apex/f?p=120:851:114439843066634:::851:P851_BA_ID,P851_REDIRECT_TO_ADF:170095 | https://artifactory.oci.oraclecorp.com/fa-14c-tpp-prod-internal-release-maven-local/org/apache/sshd/sshd-mina/2.12.1/sshd-mina-2.12.1.jar",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "25.01B | 25.04B | 25.04C | 25.07B | 25.07C | 25.07D | 25.07E?? | 25.10B | 26.01B | 26.01C? | 26.04C | 26.07B | Feb",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=36606343",
+      "relatedLinks": [
+        "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=31928257"
+      ],
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/24 - Add flag for switching off Mina03/17 - Testing is in progress",
+        "03/04 - Start local deployment",
+        "12/30 - Retest with 14c changes",
+        "10/21 - Waiting for the milestone to be open for merge",
+        "10/17 - Got new TPP jars and targeting for 25.04B",
+        "09/12 - Working with legal form",
+        "09/09 - Follow-up with legal team",
+        "09/02 - Waiting for the response from Legal team",
+        "08/26 - Replied to Legal team",
+        "08/20 - More queries from Legal team, will reply",
+        "08/12 - Added more information as requested by legal team",
+        "08/08 - Sent mail to Legal team",
+        "07/22 - Waiting for BAID approval",
+        "07/15 - Got queries from the PLS team",
+        "07/08 - slf4j new version",
+        "06/27 - BA ID request created",
+        "06/17 - Raise the BAID"
+      ]
+    },
+    {
+      "title": "HCM Engagement",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jul? | Aug",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "06/09 - Asked requestor to file ER"
+      ]
+    },
+    {
+      "title": "ARM64 Job Issue",
+      "status": "INGESTION",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "07/22 - Check with user and discontinue",
+        "06/09 - Job space issue"
+      ]
+    },
+    {
+      "title": "Support for IDCS - PSC",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Feb",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "09/22 - Working with Anjo",
+        "07/28 - Integration with Weblogic",
+        "05/26 - Documentation is up to date",
+        "04/01 - Is in progress",
+        "03/04 - IDCS instance from PSC team",
+        "02/03 - Yet to start",
+        "01/16 - Need to get the steps from family teams",
+        "01/06 - Need to understand the changes"
+      ]
+    },
+    {
+      "title": "Multiple Families in a single job",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan | Aug? | Oct",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/19 - Enable for dist"
+      ]
+    },
+    {
+      "title": "FALCON Telemetry and Email (monthly)",
+      "status": "PRODUCTION",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "Create Test Cases",
+      "status": "QA/UAT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan | Feb/Mar | Aug | Sep",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "09/25 - Good to raise MR"
+      ]
+    },
+    {
+      "title": "Build Telemetry information email to Subha/Vishwa (weekly)",
+      "status": "PRODUCTION",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "Hot Deployment",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan | Apr",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "12/30 - Check if weblogic supports"
+      ]
+    },
+    {
+      "title": "Layered Commands",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Apr"
+    },
+    {
+      "title": "Dynamic VM Pool",
+      "status": "DEVELOPMENT",
+      "assignee": "Ibrahim Mohammed",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "Handover to Adit/Ibrahim",
+        "01/20 - No must progress due to other priority",
+        "12/26 - No new changes, Srini configured a new Build VM phoenix70369.ad1.fusionappsdphx1.oraclevcn.com.",
+        "12/19 - Able to execute commands on useview",
+        "12/13 - Stuck on the useview command execution and finding solutions",
+        "12/06 - Stuck with useview pipeline",
+        "11/28 - Create and Useview is working but need to run command inside view",
+        "11/21 - Agent and Central server API on local and working on integration.",
+        "11/7 - Connect with Guru/Prasad to review the OCI services and design",
+        "10/31 - Working on POC and hello-world. Learning Helidon and Maven",
+        "10/25 - Initial kick-off and high level design"
+      ]
+    },
+    {
+      "title": "TPP Builds",
+      "status": "INGESTION",
+      "assignee": "Adabala Jishnu Preethi",
+      "area": "TPP",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/30 -",
+        "03/16 - Sent email to Harish/Krishna for access"
+      ]
+    },
+    {
+      "title": "FALCON - VM PERFORMANCE DISPLAY",
+      "status": "INGESTION",
+      "assignee": "Adabala Jishnu Preethi",
+      "area": "FALCON",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=39086602",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - Service changes bug created"
+      ]
+    },
+    {
+      "title": "Docker Dashboard",
+      "status": "DEVELOPMENT",
+      "assignee": "Adabala Jishnu Preethi",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Mar-Apr",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=39026068",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - Working on service for VM stats",
+        "03/02 - Dashboard changes and SSO authentication",
+        "02/23 - Setup page new changes and backend changes",
+        "01/16 - Setup and integration with existing dashboard",
+        "07/07 - Explored few ideas and share tomorrow",
+        "09/16 - Going through the VBCS and OJet",
+        "09/12 - Going through the code and evaluate OJect and ReactJS"
+      ]
+    },
+    {
+      "title": "DEBUG FLAG NOT RETAINED WHEN FADOMAIN GETS BOUNCED AS PART OF PATCHJAR COMMAND",
+      "status": "COMPLETED",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=38772338",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - No changes required as these are handled in later versions"
+      ]
+    },
+    {
+      "title": "IntelliJ Plugin | SMPV Intellij-Plugin- Developer Guide",
+      "status": "INGESTION",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "13-Oct-25",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "10/13 - Testing is in progress",
+        "09/15 - Need to discuss on the new changes required",
+        "08/04 - Setup a meeting and review pending items",
+        "06/30 - Demo of the plugin tomorrow 07/01",
+        "05/12 - Working on the Json",
+        "05/05 - In progress"
+      ]
+    },
+    {
+      "title": "Support for JRebel",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan | Feb?",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/23 - Shared VNC details with Praveen and waiting for testing results",
+        "02/16 - Connect on open issue",
+        "01/17 - Need license"
+      ]
+    },
+    {
+      "title": "AUTHENTICATED DOWNLOADS FROM ARTIFACTORY (Maven)",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Feb | Oct | Mar",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=38525208",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/23 - Got access to one of the Trusted VM"
+      ]
+    },
+    {
+      "title": "INTEGRATE AI STUDIO WITH FALCON",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Oct | Mar",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=38525234",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - Update the Jira with ETA",
+        "03/16 - Deployed apg files, microservice and"
+      ]
+    },
+    {
+      "title": "Docker Job for Sandhya Menon for Validating P4FA",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Feb | Apr | Aug"
+    },
+    {
+      "title": "Docker Project Status email to Subha/Vishwa (monthly)",
+      "status": "PRODUCTION",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "Create DB instance for a release and extract the DB MDS data for all families",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Jan | Feb | Mar | May | Aug"
+    },
+    {
+      "title": "oAuth Migration to IDCS (Santrupta)",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "P4FA Patching Issue",
+      "status": "INGESTION",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "Workaround : 17 Nov 2023",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=35546780",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/04 - Check in 14c and confirm",
+        "10/17 - Test without workaround",
+        "09/12 - Remove the workaround and try again",
+        "01/22 - Follow-up with Sandhya",
+        "11/20 - Merged to master and deploy to production and also setup a meeting",
+        "11/14 - Test patching directly inside job and move to production",
+        "11/06 - Move the fix to production",
+        "09/25 - Follow-up on the issue with Sandhya",
+        "08/21 - Job was successful with workaround.",
+        "07/31 - Triggered a job with workaround of OPatch",
+        "07/24 - Sent a mail to Sandhya Menon, setup a meeting"
+      ]
+    },
+    {
+      "title": "Support for ATK family",
+      "status": "INGESTION",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "29 Feb 2024 | SEP | ??",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/16 - New label artifacts are generated and UAT is in progress",
+        "08/20 - Check with ATF family and move to QA",
+        "03/14 - Check the latest status",
+        "02/05 - Made few changes specific to ATK, UAT in progress",
+        "01/22 - Container is failing, looking into it",
+        "11/14 - Having is blocker on navigation.",
+        "11/06 - Reported issues need to be fixed and unblock",
+        "08/14 - Setup a meeting with Jyothi",
+        "07/31 - UMS configuration issue for BPMWorklist",
+        "07/24 - Resetting on new VM",
+        "07/18 - BPM worklist still having issue",
+        "07/03 - BPM worklist having issue creating TODO",
+        "06/26 - Requested for BI/BPM",
+        "06/05 - Jobs failed.",
+        "01/20 - Follow-up with Ignatio"
+      ]
+    },
+    {
+      "title": "Optimising Builds - Tasks | Docker Layered ER/Bugs - | P4FA Image size because of .CAS folder - COMPLETE | Layered image generation from Leigh Miller page and upload to local repo. - PROGRESS | Integrate Dashboard and Move the CLI script | Creating Image for the DB and Orchestate with Kubernetes | Apex Telemetry for different Operation and error handling | ODA Integration ( Skills : FAQ and Status)",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "release": "12/23 - DEV | 12/30 - DEV | 31 Mar 2023 | 19 Apr 2023 | 28 Apr 2023 | Nov | Dec | Jan | ?? | Mar",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=33232881",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "11/04 - Complete in Nov 2024",
+        "01/22 - Making few changes for job failure",
+        "05/08 - After ARM64, will rollout layered",
+        "01/20 - MR created after dev testing and review in progress",
+        "01/02 - graph.xml is not found on the view and deployment is failing in job",
+        "12/26 - Unit tests are in progress",
+        "12/19 - Job Apps generation has some issue",
+        "11/07 - Able to create the container but working on few configuration steps",
+        "9/20 - Got the additional quota of 500 GB",
+        "Working on Docker Image generation",
+        "Evaluate Docker swarm, Docker compose, Kubernetes and Terraform",
+        "Go through the Helium"
+      ]
+    },
+    {
+      "title": "Docker Dashboard | Cache dashboard UI changes | Menubar Integration - PROGRESS",
+      "status": "DEVELOPMENT",
+      "assignee": "Meenal Jain",
+      "area": "FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "01/20 - Working on dashboard api changes",
+        "New comments given to separate the files upload"
+      ]
+    },
+    {
+      "title": "Delete ADF Dependencies Tool Migration from Python. 2 to 3",
+      "status": "DEVELOPMENT",
+      "assignee": "Manan Gupta",
+      "area": "BUILD",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "04/06 - There are multiple dependencies, analysing"
+      ]
+    },
+    {
+      "title": "Backend Changes",
+      "status": "DEVELOPMENT",
+      "assignee": "Manan Gupta",
+      "area": "CODE FALCON",
+      "priority": "Medium"
+    },
+    {
+      "title": "Enh 39061582 - DEV EMAIL ON JOB FAILURES/LOSS OF SERVICE",
+      "status": "DEVELOPMENT",
+      "assignee": "Manan Gupta",
+      "area": "CODE FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - MR created"
+      ]
+    },
+    {
+      "title": "USER AUTHENTICATION FOR OBSERVABILITY DASHBOARD",
+      "status": "DEVELOPMENT",
+      "assignee": "Manan Gupta",
+      "area": "CODE FALCON",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=38997443",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - MR created",
+        "03/02- Dev is in progress"
+      ]
+    },
+    {
+      "title": "CREATE TPP REQUESTS FOR USED LIBRARIES.",
+      "status": "INGESTION",
+      "assignee": "Manan Gupta",
+      "area": "CODE FALCON",
+      "priority": "Medium",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=38985338",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/16 - On hold"
+      ]
+    },
+    {
+      "title": "INCREMENTAL MR REVIEW",
+      "status": "COMPLETED",
+      "assignee": "Manan Gupta",
+      "area": "CODE FALCON",
+      "priority": "Medium",
+      "release": "24-Mar-26",
+      "jiraUrl": "https://bug.oraclecorp.com/pls/bug/webbug_edit.edit_info_top?rptno=38985288",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "03/23 - Code changes are in progress",
+        "03/16 - Dev in progress"
+      ]
+    },
+    {
+      "title": "Observability Dashboard in OJet",
+      "status": "INGESTION",
+      "assignee": "Manan Gupta",
+      "area": "CODE FALCON",
+      "priority": "Medium",
+      "commentsOrder": "newest-first",
+      "comments": [
+        "02/16 -"
+      ]
+    },
+    {
+      "title": "POC for AI knowledge base",
+      "status": "DEVELOPMENT",
+      "assignee": "Manan Gupta",
+      "area": "FALCON",
+      "priority": "Medium"
+    }
+  ]
+}
