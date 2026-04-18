@@ -309,6 +309,21 @@
   min-width: 66px;
 }
 
+.effort-inline-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.effort-suffix {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #4c5448;
+}
+
 .note-title-band {
   display: flex;
   align-items: flex-start;
@@ -543,6 +558,18 @@ textarea {
   font-size: 0.78rem;
 }
 
+.blocked-toggle {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(20, 52, 43, 0.08);
+  font-size: 0.78rem;
+}
+
+.blocked-toggle-active {
+  background: rgba(176, 49, 42, 0.18);
+  color: #7d1711;
+}
+
 .release-pill {
   display: inline-flex;
   align-items: center;
@@ -561,8 +588,26 @@ textarea {
   min-height: 28px;
 }
 
+.task-link-row-inline {
+  align-items: center;
+  gap: 8px;
+}
+
+.task-link-row-inline input {
+  flex: 1 1 auto;
+}
+
 .task-link-button {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 8px;
+}
+
+.task-link-button svg {
+  display: block;
 }
 
 .comments-panel {

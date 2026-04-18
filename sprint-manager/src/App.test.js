@@ -40,6 +40,7 @@ test('contributors can edit task fields', () => {
   expect(screen.getAllByLabelText(/priority/i)[0]).toBeEnabled();
   expect(screen.getAllByLabelText(/status/i)[0]).toBeEnabled();
   expect(screen.getAllByLabelText(/effort/i)[0]).toBeEnabled();
+  expect(screen.getAllByLabelText(/blocked status/i)[0]).toBeEnabled();
   expect(screen.getAllByLabelText(/start date/i)[0]).toBeEnabled();
   expect(screen.getAllByLabelText(/end date/i)[0]).toBeEnabled();
   expect(screen.queryByText(/Burndown dashboard refresh/i)).not.toBeInTheDocument();
@@ -146,7 +147,7 @@ test('task title is not editable in completed stage', () => {
   expect(screen.queryByLabelText(/title for released feature pack/i)).not.toBeInTheDocument();
 });
 
-test('shows only the newest five comments until expanded', () => {
+test('shows only the newest three comments until expanded', () => {
   window.localStorage.setItem(
     'sprint-manager-user',
     JSON.stringify({
@@ -186,8 +187,14 @@ test('shows only the newest five comments until expanded', () => {
 
   expect(screen.getByText(/show 3 older comments/i)).toBeInTheDocument();
   expect(screen.queryByText('Comment 1')).not.toBeInTheDocument();
+  expect(screen.queryByText('Comment 2')).not.toBeInTheDocument();
+  expect(screen.queryByText('Comment 3')).not.toBeInTheDocument();
+  expect(screen.getByText('Comment 4')).toBeInTheDocument();
+  expect(screen.getByText('Comment 5')).toBeInTheDocument();
+  expect(screen.getByText('Comment 6')).toBeInTheDocument();
 
   fireEvent.click(screen.getByText(/show 3 older comments/i));
 
   expect(screen.getByText('Comment 1')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /hide older comments/i })).toBeInTheDocument();
 });

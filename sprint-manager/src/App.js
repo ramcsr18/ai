@@ -7,6 +7,43 @@ import { canUserAccessTask, normalizeTasks, normalizeTask } from './utils/taskUt
 
 const TASK_STORAGE_KEY = 'sprint-manager-tasks';
 
+function ExternalLinkIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M11 3h6v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 11l8-8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 11v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function readStoredTasks() {
   if (typeof window === 'undefined') {
     return normalizeTasks(INITIAL_TASKS);
@@ -473,16 +510,16 @@ function Dashboard() {
           />
 
           <label htmlFor="task-bug-url">Bug or Jira URL</label>
-          <input
-            id="task-bug-url"
-            type="url"
-            value={newTask.bugUrl}
-            onChange={(event) =>
-              setNewTask((current) => ({ ...current, bugUrl: event.target.value }))
-            }
-            placeholder="https://jira.example.com/browse/ABC-123"
-          />
-          <div className="task-link-row">
+          <div className="task-link-row task-link-row-inline">
+            <input
+              id="task-bug-url"
+              type="url"
+              value={newTask.bugUrl}
+              onChange={(event) =>
+                setNewTask((current) => ({ ...current, bugUrl: event.target.value }))
+              }
+              placeholder="https://jira.example.com/browse/ABC-123"
+            />
             {newTask.bugUrl ? (
               <button
                 type="button"
@@ -491,7 +528,7 @@ function Dashboard() {
                 aria-label="Open task bug or Jira URL in a new tab"
                 title="Open in a new tab"
               >
-                Open
+                <ExternalLinkIcon />
               </button>
             ) : null}
           </div>

@@ -29,6 +29,44 @@ const statusHeaderColors = {
 };
 
 const priorityOptions = ['High', 'Medium', 'Low'];
+const DEFAULT_VISIBLE_COMMENTS = 3;
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M11 3h6v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 11l8-8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 11v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function StickyNote({
   task,
@@ -56,6 +94,10 @@ export default function StickyNote({
     setDraftArea(task.squad);
   }, [task.squad]);
 
+  useEffect(() => {
+    setShowAllComments(false);
+  }, [task.id, task.comments.length]);
+
   const sortedComments = useMemo(
     () =>
       [...task.comments].sort(
@@ -64,8 +106,13 @@ export default function StickyNote({
     [task.comments]
   );
 
-  const visibleComments = showAllComments ? sortedComments : sortedComments.slice(0, 3);
-  const hiddenCommentCount = Math.max(sortedComments.length - 3, 0);
+  const visibleComments = showAllComments
+    ? sortedComments
+    : sortedComments.slice(0, DEFAULT_VISIBLE_COMMENTS);
+  const hiddenCommentCount = Math.max(
+    sortedComments.length - DEFAULT_VISIBLE_COMMENTS,
+    0
+  );
 
   const submitComment = () => {
     const trimmedDraft = task.draftComment.trim();
@@ -74,6 +121,7 @@ export default function StickyNote({
       return;
     }
 
+    setShowAllComments(false);
     onCommentAdd(task.id, createComment(trimmedDraft));
   };
 
@@ -248,20 +296,32 @@ export default function StickyNote({
             </option>
           ))}
         </select>
-        <input
-          id={`task-effort-${task.id}`}
-          className="effort-input effort-input-inline"
-          type="number"
-          min="1"
-          value={task.effort}
-          onChange={(event) =>
-            onUpdate(task.id, { effort: Number(event.target.value) || 1 })
-          }
-          disabled={!canEdit}
-          aria-label={`Effort for ${task.title}`}
-          title="Effort in hours"
-        />
-        {task.blocked ? <span className="tag tag-alert">Blocked</span> : null}
+        <div className="effort-inline-group" title="Effort in hours">
+          <input
+            id={`task-effort-${task.id}`}
+            className="effort-input effort-input-inline"
+            type="number"
+            min="1"
+            value={task.effort}
+            onChange={(event) =>
+              onUpdate(task.id, { effort: Number(event.target.value) || 1 })
+            }
+            disabled={!canEdit}
+            aria-label={`Effort for ${task.title}`}
+          />
+          <span className="effort-suffix">hrs</span>
+        </div>
+        <label className={`checkbox-row blocked-toggle ${task.blocked ? 'blocked-toggle-active' : ''}`} htmlFor={`task-blocked-${task.id}`}>
+          <input
+            id={`task-blocked-${task.id}`}
+            type="checkbox"
+            checked={task.blocked}
+            disabled={!canEdit}
+            onChange={(event) => onUpdate(task.id, { blocked: event.target.checked })}
+            aria-label={`Blocked status for ${task.title}`}
+          />
+          Blocked
+        </label>
         <label className="checkbox-row milestone-checkbox" htmlFor={`task-milestone-${task.id}`}>
           <input
             id={`task-milestone-${task.id}`}
@@ -303,17 +363,17 @@ export default function StickyNote({
         </div>
       </div>
 
-      <input
-        id={`task-bug-url-${task.id}`}
-        type="url"
-        value={task.bugUrl}
-        onChange={(event) => onUpdate(task.id, { bugUrl: event.target.value })}
-        disabled={!canEdit}
-        placeholder="Bug or Jira URL"
-        aria-label={`Bug or Jira URL for ${task.title}`}
-        title="Bug or Jira URL"
-      />
-      <div className="task-link-row">
+      <div className="task-link-row task-link-row-inline">
+        <input
+          id={`task-bug-url-${task.id}`}
+          type="url"
+          value={task.bugUrl}
+          onChange={(event) => onUpdate(task.id, { bugUrl: event.target.value })}
+          disabled={!canEdit}
+          placeholder="Bug or Jira URL"
+          aria-label={`Bug or Jira URL for ${task.title}`}
+          title="Bug or Jira URL"
+        />
         {task.bugUrl ? (
           <button
             type="button"
@@ -322,7 +382,7 @@ export default function StickyNote({
             aria-label={`Open linked ticket for ${task.title} in a new tab`}
             title="Open linked ticket in a new tab"
           >
-            Open
+            <ExternalLinkIcon />
           </button>
         ) : null}
       </div>
