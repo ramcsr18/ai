@@ -27,7 +27,7 @@ const statusHeaderColors = {
   Testing: 'linear-gradient(135deg, #ffe3e3, #d88484)',
   'QA/UAT': 'linear-gradient(135deg, #ffedd6, #e0a660)',
   Production: 'linear-gradient(135deg, #e7fbe9, #79be86)',
-  Completed: 'linear-gradient(135deg, #eef6ff, #8db1e6)',
+  Completed: 'linear-gradient(135deg, #e6f7ff, #4c9fd1)',
 };
 const alertHeaderGradient = 'linear-gradient(135deg, #ffd7d7, #b42318)';
 const unassignedIngestionGradient = 'linear-gradient(135deg, #e2e8f0, #64748b)';
@@ -143,6 +143,34 @@ function TrashIcon() {
       />
       <path
         d="M4.8 5.2h10.4M7.6 5.2V3.8h4.8v1.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M4 14.8 4.8 11l7.8-7.8a1.4 1.4 0 0 1 2 0l1.2 1.2a1.4 1.4 0 0 1 0 2L8 14.2 4 14.8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11.6 4.2 15.8 8.4"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
@@ -340,7 +368,9 @@ export default function StickyNote({
   const canEditComments = canEdit && isAdmin;
   const titleToneClass = getTaskTitleTone(task);
   const isUnassignedIngestion = isAdmin && task.status === 'Ingestion' && !String(task.assignee || '').trim();
-  const headerBackground = task.blocked || isTaskOverdue(task)
+  const headerBackground = task.status === 'Completed'
+    ? statusHeaderColors.Completed
+    : task.blocked || isTaskOverdue(task)
     ? alertHeaderGradient
     : isUnassignedIngestion
       ? unassignedIngestionGradient
@@ -353,33 +383,80 @@ export default function StickyNote({
       <article
         key={comment.id}
         className={`comment-item ${isHistory ? 'comment-item-history' : ''} ${canEditComments ? 'comment-item-editable' : ''}`}
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
+        <div className="comment-item-header">
+          <div className="comment-date">{formatCommentDate(comment.createdAt)}</div>
+          {canEditComments && !isEditingComment ? (
+            <button
+              type="button"
+              className="ghost-button icon-button comment-edit-trigger"
+              onClick={(event) => {
+                event.stopPropagation();
+                startEditingComment(comment);
+              }}
+              onMouseDown={(event) => event.stopPropagation()}
+              aria-label={`Edit comment dated ${formatCommentDate(comment.createdAt)} for ${task.title}`}
+              title="Edit comment"
+            >
+              <EditIcon />
+            </button>
+          ) : null}
+        </div>
         {isEditingComment ? (
-          <textarea
-            className="comment-edit-input"
-            value={draftCommentText}
-            onChange={(event) => setDraftCommentText(event.target.value)}
-            onBlur={() => submitEditedComment(comment)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                submitEditedComment(comment);
-              }
+          <div
+            className="comment-edit-shell"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <textarea
+              className="comment-edit-input"
+              value={draftCommentText}
+              onChange={(event) => setDraftCommentText(event.target.value)}
+              onClick={(event) => event.stopPropagation()}
+              onDoubleClick={(event) => event.stopPropagation()}
+              onBlur={() => submitEditedComment(comment)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  submitEditedComment(comment);
+                }
 
-              if (event.key === 'Escape') {
-                event.preventDefault();
-                stopEditingComment();
-              }
-            }}
-            aria-label={`Edit comment for ${task.title}`}
-            title="Edit comment"
-            autoFocus
-            rows={2}
-          />
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  stopEditingComment();
+                }
+              }}
+              aria-label={`Edit comment for ${task.title}`}
+              title="Edit comment"
+              autoFocus
+              rows={2}
+            />
+            <div className="comment-edit-actions">
+              <button
+                type="button"
+                className="ghost-button comment-edit-action"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => submitEditedComment(comment)}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="ghost-button comment-edit-action"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={stopEditingComment}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         ) : (
           <p
-            onDoubleClick={() => startEditingComment(comment)}
+            onDoubleClick={(event) => {
+              event.stopPropagation();
+              startEditingComment(comment);
+            }}
             title={canEditComments ? 'Double-click to edit comment' : undefined}
           >
             {comment.text}

@@ -17,6 +17,7 @@
     "start:client": "react-scripts start",
     "server": "node server/index.js",
     "start:prod": "node server/index.js",
+    "start:bg": "bash scripts/run-background.sh",
     "build": "react-scripts build",
     "migrate:sqlite": "node scripts/migrate-sqlite.js",
     "package:prod": "bash scripts/package-production.sh",

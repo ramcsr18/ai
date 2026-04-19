@@ -410,14 +410,26 @@ test('contributors can create tasks only for themselves', async () => {
   await loginAsResource();
 
   fireEvent.click(screen.getByRole('button', { name: /create task/i }));
+  const createTaskDialog = screen.getByRole('dialog', { name: /create task/i });
 
-  expect(screen.getByLabelText(/owner/i)).toHaveValue('Avery Chen');
-  expect(screen.getByLabelText(/owner/i)).toBeDisabled();
+  expect(within(createTaskDialog).getByLabelText(/owner/i)).toHaveValue('Avery Chen');
+  expect(within(createTaskDialog).getByLabelText(/owner/i)).toBeDisabled();
+  expect(within(createTaskDialog).getByLabelText(/effort \(hours\)/i)).toHaveValue(null);
+  expect(within(createTaskDialog).getByLabelText(/^end date$/i)).toHaveValue('');
 
-  fireEvent.change(screen.getByLabelText(/title/i), {
+  fireEvent.change(within(createTaskDialog).getByLabelText(/start date/i), {
+    target: { value: '2026-04-20' },
+  });
+  fireEvent.change(within(createTaskDialog).getByLabelText(/effort \(hours\)/i), {
+    target: { value: '20' },
+  });
+
+  expect(within(createTaskDialog).getByLabelText(/^end date$/i)).toHaveValue('2026-04-22');
+
+  fireEvent.change(within(createTaskDialog).getByLabelText(/title/i), {
     target: { value: 'My new contributor task' },
   });
-  fireEvent.click(screen.getByRole('button', { name: /add task/i }));
+  fireEvent.click(within(createTaskDialog).getByRole('button', { name: /add task/i }));
 
   expect(await screen.findByText(/My new contributor task/i)).toBeInTheDocument();
 });

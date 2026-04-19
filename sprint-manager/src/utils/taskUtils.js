@@ -113,6 +113,23 @@ export function getDateInputValue(value) {
   return date.toISOString().slice(0, 10);
 }
 
+export function calculateBufferedEndDate(startDate, effortHours) {
+  const normalizedStartDate = getDateInputValue(startDate);
+  const numericEffort = Number(effortHours);
+
+  if (!normalizedStartDate || !Number.isFinite(numericEffort) || numericEffort <= 0) {
+    return '';
+  }
+
+  const bufferedHours = numericEffort * 1.2;
+  const workingDays = Math.max(1, Math.ceil(bufferedHours / 8));
+  const endDate = new Date(`${normalizedStartDate}T12:00:00`);
+
+  endDate.setDate(endDate.getDate() + workingDays - 1);
+
+  return endDate.toISOString().slice(0, 10);
+}
+
 export function formatShortDate(dateString) {
   const date = new Date(dateString);
 

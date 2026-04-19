@@ -995,12 +995,31 @@ textarea {
   background: rgba(255, 255, 255, 0.58);
 }
 
+.comment-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .comment-item-editable p {
   cursor: text;
 }
 
 .comment-item p {
   margin: 6px 0 0;
+}
+
+.comment-edit-trigger {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 6px;
+  flex: 0 0 auto;
+}
+
+.comment-edit-shell {
+  display: grid;
+  gap: 8px;
 }
 
 .comment-edit-input {
@@ -1010,6 +1029,17 @@ textarea {
   resize: vertical;
   border-radius: 10px;
   background: rgba(255, 253, 247, 0.9);
+  user-select: text;
+}
+
+.comment-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.comment-edit-action {
+  padding: 8px 12px;
 }
 
 .comment-date {

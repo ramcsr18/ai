@@ -4,6 +4,7 @@ import KanbanBoard from './components/KanbanBoard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { STAGES } from './data/seedData';
 import {
+  calculateBufferedEndDate,
   canUserAccessTask,
   filterBoardTasks,
   getCurrentTimestamp,
@@ -226,6 +227,10 @@ function getDefaultAssignee(resources, fallbackAssignee = '') {
 
 function getResourceOptionLabel(resource) {
   return resource.email ? `${resource.name} - ${resource.email}` : resource.name;
+}
+
+function getDefaultTaskStartDate() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function ResourceManager({
@@ -515,6 +520,9 @@ function TaskComposerDialog({
   user,
   newTask,
   setNewTask,
+  onTaskEffortChange,
+  onTaskStartChange,
+  onTaskEndChange,
   onSubmit,
   onClose,
 }) {
@@ -643,9 +651,7 @@ function TaskComposerDialog({
             type="number"
             min="1"
             value={newTask.effort}
-            onChange={(event) =>
-              setNewTask((current) => ({ ...current, effort: event.target.value }))
-            }
+            onChange={(event) => onTaskEffortChange(event.target.value)}
           />
 
           <label htmlFor="task-start">Start date</label>
@@ -653,9 +659,7 @@ function TaskComposerDialog({
             id="task-start"
             type="date"
             value={newTask.start}
-            onChange={(event) =>
-              setNewTask((current) => ({ ...current, start: event.target.value }))
-            }
+            onChange={(event) => onTaskStartChange(event.target.value)}
           />
 
           <label htmlFor="task-end">End date</label>
@@ -663,9 +667,7 @@ function TaskComposerDialog({
             id="task-end"
             type="date"
             value={newTask.end}
-            onChange={(event) =>
-              setNewTask((current) => ({ ...current, end: event.target.value }))
-            }
+            onChange={(event) => onTaskEndChange(event.target.value)}
           />
 
           <label htmlFor="task-release">Release</label>
@@ -1067,13 +1069,14 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [stageFilter, setStageFilter] = useState('all');
+  const [isNewTaskEndManual, setIsNewTaskEndManual] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
     assignee: isAdmin ? getDefaultAssignee(getInitialResourceSnapshot(), user.name) : user.name,
     status: STAGES[0],
-    effort: 8,
-    start: '2026-04-20',
-    end: '2026-04-24',
+    effort: '',
+    start: getDefaultTaskStartDate(),
+    end: '',
     squad: 'BUILD',
     release: '',
     milestone: false,
@@ -1153,6 +1156,25 @@ function Dashboard() {
       };
     });
   }, [isAdmin, resources, user.name]);
+
+  useEffect(() => {
+    if (isNewTaskEndManual) {
+      return;
+    }
+
+    setNewTask((current) => {
+      const nextEnd = calculateBufferedEndDate(current.start, current.effort);
+
+      if (current.end === nextEnd) {
+        return current;
+      }
+
+      return {
+        ...current,
+        end: nextEnd,
+      };
+    });
+  }, [isNewTaskEndManual, newTask.effort, newTask.start]);
 
   const accessibleTasks = tasks.filter((task) => canUserAccessTask(user, task));
   const filteredTasks = filterBoardTasks(accessibleTasks, {
@@ -1265,7 +1287,7 @@ function Dashboard() {
       ...newTask,
       assignee: isAdmin ? newTask.assignee : user.name,
       title,
-      effort: Number(newTask.effort),
+      effort: Number(newTask.effort) || 0,
       id: `task-${Date.now()}`,
     });
 
@@ -1273,6 +1295,7 @@ function Dashboard() {
       const createdTask = await createTaskRecord(taskToCreate);
       setTasks((currentTasks) => [createdTask, ...currentTasks]);
       setTaskError('');
+      setIsNewTaskEndManual(false);
       setNewTask((current) => ({
         ...current,
         title: '',
@@ -1280,9 +1303,11 @@ function Dashboard() {
         bugUrl: '',
         comments: [],
         draftComment: '',
-        effort: 8,
+        effort: '',
         blocked: false,
         status: STAGES[0],
+        start: getDefaultTaskStartDate(),
+        end: '',
         release: '',
         milestone: false,
         priority: 'Medium',
@@ -1301,6 +1326,29 @@ function Dashboard() {
     if (wasCreated) {
       setIsTaskDialogOpen(false);
     }
+  };
+
+  const handleNewTaskEffortChange = (effort) => {
+    setIsNewTaskEndManual(false);
+    setNewTask((current) => ({
+      ...current,
+      effort,
+    }));
+  };
+
+  const handleNewTaskStartChange = (start) => {
+    setNewTask((current) => ({
+      ...current,
+      start,
+    }));
+  };
+
+  const handleNewTaskEndChange = (end) => {
+    setIsNewTaskEndManual(true);
+    setNewTask((current) => ({
+      ...current,
+      end,
+    }));
   };
 
   const deleteTask = async (taskId) => {
@@ -1643,6 +1691,9 @@ function Dashboard() {
           user={user}
           newTask={newTask}
           setNewTask={setNewTask}
+          onTaskEffortChange={handleNewTaskEffortChange}
+          onTaskStartChange={handleNewTaskStartChange}
+          onTaskEndChange={handleNewTaskEndChange}
           onSubmit={handleTaskDialogSubmit}
           onClose={() => setIsTaskDialogOpen(false)}
         />

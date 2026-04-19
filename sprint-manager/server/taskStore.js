@@ -73,6 +73,7 @@ ensureColumnExists('resources', 'require_password_change', 'INTEGER NOT NULL DEF
 
 const DEFAULT_MANAGER_BOOTSTRAP_PASSWORD = 'Welcome@123';
 const DEFAULT_CONTRIBUTOR_BOOTSTRAP_PASSWORD = 'Welcome1';
+const DEFAULT_NEW_RESOURCE_PASSWORD = 'Welcome@123';
 const REQUIRED_MANAGER_EMAIL = 'ram.mohan.yaratapally@oracle.com';
 const REQUIRED_MANAGER_NAME = 'Ram Mohan Yaratapally';
 
@@ -454,6 +455,10 @@ function generateTemporaryPassword(length = 12) {
 function getDefaultPasswordForRole(role, mode = 'create') {
   const normalizedRole = normalizeResourceRole(role);
 
+  if (mode === 'create') {
+    return DEFAULT_NEW_RESOURCE_PASSWORD;
+  }
+
   if (normalizedRole === 'Contributor') {
     return DEFAULT_CONTRIBUTOR_BOOTSTRAP_PASSWORD;
   }
@@ -464,6 +469,10 @@ function getDefaultPasswordForRole(role, mode = 'create') {
 }
 
 function buildRoleAwareUser(resource) {
+  if (!resource) {
+    throw new Error('Unable to resolve the resource account.');
+  }
+
   const registrationRole = normalizeResourceRole(resource?.role);
 
   return {
@@ -485,6 +494,10 @@ function sanitizeResource(resource) {
 }
 
 function normalizeResource(resource) {
+  if (!resource || typeof resource !== 'object') {
+    return null;
+  }
+
   const normalizedResourceId =
     reserveSequenceValue('resource_id', resource.id) ??
     (resource.id !== undefined && resource.id !== null && String(resource.id).trim()
@@ -678,7 +691,10 @@ function listTasks() {
 }
 
 function listResources() {
-  return selectAllResourcesStatement.all().map((row) => sanitizeResource(getResourceById(row.id)));
+  return selectAllResourcesStatement
+    .all()
+    .map((row) => sanitizeResource(getResourceById(row.id)))
+    .filter(Boolean);
 }
 
 function getTaskById(id) {
@@ -797,11 +813,13 @@ function changeResourcePassword(email, currentPassword, nextPassword) {
   }
 
   updateResourcePasswordStatement.run(createPasswordHash(trimmedNextPassword), String(resource.id));
-  const updatedResource = getResourceById(resource.id);
 
   return {
     user: {
-      ...buildRoleAwareUser(updatedResource),
+      ...buildRoleAwareUser({
+        ...resource,
+        requiresPasswordChange: false,
+      }),
       mustChangePassword: false,
       authProvider: 'local',
     },

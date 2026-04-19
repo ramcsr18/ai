@@ -19,6 +19,7 @@ const { sendOpenTasksReport, startDailySummaryScheduler } = require('./reporting
 
 const port = Number(process.env.PORT) || 4000;
 const buildDirectory = path.join(__dirname, '..', 'build');
+const MAX_JSON_BODY_BYTES = 1_000_000;
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
@@ -39,18 +40,35 @@ function sendText(response, statusCode, message) {
 
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
-    let body = '';
+    let totalBytes = 0;
+    let isComplete = false;
+    const bodyChunks = [];
 
     request.on('data', (chunk) => {
-      body += chunk;
+      if (isComplete) {
+        return;
+      }
 
-      if (body.length > 1_000_000) {
+      totalBytes += chunk.length;
+
+      if (totalBytes > MAX_JSON_BODY_BYTES) {
+        isComplete = true;
         request.destroy();
         reject(new Error('Request body is too large.'));
+        return;
       }
+
+      bodyChunks.push(chunk);
     });
 
     request.on('end', () => {
+      if (isComplete) {
+        return;
+      }
+
+      isComplete = true;
+      const body = Buffer.concat(bodyChunks).toString('utf8');
+
       if (!body) {
         resolve({});
         return;
@@ -63,7 +81,14 @@ function readJsonBody(request) {
       }
     });
 
-    request.on('error', reject);
+    request.on('error', (error) => {
+      if (isComplete) {
+        return;
+      }
+
+      isComplete = true;
+      reject(error);
+    });
   });
 }
 

@@ -11,6 +11,7 @@ const RESOURCE_STORAGE_KEY = 'sprint-manager-resources';
 const RESOURCE_AUTH_STORAGE_KEY = 'sprint-manager-resource-auth';
 const TEST_CONTRIBUTOR_PASSWORD = 'Welcome1';
 const TEST_MANAGER_PASSWORD = 'Welcome@123';
+const TEST_NEW_RESOURCE_PASSWORD = 'Welcome@123';
 
 function normalizeApiBase(url) {
   return (url || '').trim().replace(/\/+$/, '');
@@ -604,7 +605,7 @@ export async function createResource(resource) {
   if (isTestEnvironment()) {
     const nextResource = normalizeResource({
       ...resource,
-      temporaryPassword: getDefaultTestPasswordForResource(resource),
+      temporaryPassword: TEST_NEW_RESOURCE_PASSWORD,
       requiresPasswordChange: true,
     });
     const currentResources = readTestResources();
