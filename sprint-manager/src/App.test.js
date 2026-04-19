@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import App from './App';
 
 const ORIGINAL_ENV = { ...process.env };
+const CONTRIBUTOR_DEFAULT_PASSWORD = 'Welcome1';
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -24,14 +25,14 @@ async function loginAsResource(email = 'avery.chen@example.com') {
     target: { value: email },
   });
   fireEvent.change(screen.getByLabelText(/^password$/i), {
-    target: { value: 'Welcome@123' },
+    target: { value: CONTRIBUTOR_DEFAULT_PASSWORD },
   });
   fireEvent.click(screen.getByRole('button', { name: /sign in with email/i }));
   await waitFor(() => {
     expect(screen.getByText(/change your temporary password/i)).toBeInTheDocument();
   });
   fireEvent.change(screen.getByLabelText(/current password/i), {
-    target: { value: 'Welcome@123' },
+    target: { value: CONTRIBUTOR_DEFAULT_PASSWORD },
   });
   fireEvent.change(screen.getByLabelText(/^new password$/i), {
     target: { value: 'Changed@123' },
@@ -53,6 +54,12 @@ async function signInWithPassword(email, password) {
     target: { value: password },
   });
   fireEvent.click(screen.getByRole('button', { name: /sign in with email/i }));
+}
+
+function expectSummaryValue(label, value) {
+  const card = screen.getByText(label).closest('article');
+  expect(card).not.toBeNull();
+  expect(within(card).getByText(value)).toBeInTheDocument();
 }
 
 test('renders Oracle SSO login with a development fallback', () => {
@@ -94,11 +101,11 @@ test('loads the dashboard after demo login', async () => {
 test('first-login password change allows sign in with the new password', async () => {
   render(<App />);
 
-  await signInWithPassword('avery.chen@example.com', 'Welcome@123');
+  await signInWithPassword('avery.chen@example.com', CONTRIBUTOR_DEFAULT_PASSWORD);
   expect(await screen.findByText(/change your temporary password/i)).toBeInTheDocument();
 
   fireEvent.change(screen.getByLabelText(/current password/i), {
-    target: { value: 'Welcome@123' },
+    target: { value: CONTRIBUTOR_DEFAULT_PASSWORD },
   });
   fireEvent.change(screen.getByLabelText(/^new password$/i), {
     target: { value: 'Changed@123' },
@@ -122,6 +129,38 @@ test('first-login password change allows sign in with the new password', async (
   expect(screen.queryByText(/change your temporary password/i)).not.toBeInTheDocument();
 });
 
+test('logged in users can change password from the top panel', async () => {
+  render(<App />);
+
+  await loginAsResource();
+
+  fireEvent.click(screen.getByRole('button', { name: /change password/i }));
+
+  const passwordDialog = screen.getByRole('dialog', { name: /change password/i });
+  fireEvent.change(within(passwordDialog).getByLabelText(/current password/i), {
+    target: { value: 'Changed@123' },
+  });
+  fireEvent.change(within(passwordDialog).getByLabelText(/^new password$/i), {
+    target: { value: 'Again@123' },
+  });
+  fireEvent.change(within(passwordDialog).getByLabelText(/confirm new password/i), {
+    target: { value: 'Again@123' },
+  });
+  fireEvent.click(within(passwordDialog).getByRole('button', { name: /update password/i }));
+
+  await waitFor(() => {
+    expect(screen.queryByRole('dialog', { name: /change password/i })).not.toBeInTheDocument();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: /sign out/i }));
+
+  await signInWithPassword('avery.chen@example.com', 'Again@123');
+
+  await waitFor(() => {
+    expect(screen.getByLabelText(/sprint task board/i)).toBeInTheDocument();
+  });
+});
+
 test('contributors can edit task fields', async () => {
   render(<App />);
 
@@ -134,6 +173,100 @@ test('contributors can edit task fields', async () => {
   expect(screen.getAllByLabelText(/start date/i)[0]).toBeEnabled();
   expect(screen.getAllByLabelText(/end date/i)[0]).toBeEnabled();
   expect(screen.queryByText(/Burndown dashboard refresh/i)).not.toBeInTheDocument();
+});
+
+test('dashboard summary cards reflect the active filters', () => {
+  window.localStorage.setItem(
+    'sprint-manager-user',
+    JSON.stringify({
+      name: 'Admin',
+      email: 'admin@example.com',
+      role: 'admin',
+      authProvider: 'demo',
+    })
+  );
+
+  window.localStorage.setItem(
+    'sprint-manager-tasks',
+    JSON.stringify([
+      {
+        id: 'task-alpha',
+        title: 'Alpha integration',
+        status: 'Implementation',
+        effort: 5,
+        start: '2026-04-18',
+        end: '2026-04-22',
+        assignee: 'Avery Chen',
+        squad: 'BUILD',
+        release: '',
+        milestone: false,
+        priority: 'High',
+        blocked: false,
+        bugUrl: '',
+        draftComment: '',
+        comments: [],
+      },
+      {
+        id: 'task-beta',
+        title: 'Beta release',
+        status: 'Production',
+        effort: 8,
+        start: '2026-04-17',
+        end: '2026-04-20',
+        assignee: 'Jordan Lee',
+        squad: 'BUILD',
+        release: '',
+        milestone: false,
+        priority: 'Medium',
+        blocked: true,
+        bugUrl: '',
+        draftComment: '',
+        comments: [],
+      },
+      {
+        id: 'task-gamma',
+        title: 'Gamma rollout',
+        status: 'Production',
+        effort: 3,
+        start: '2026-04-17',
+        end: '2026-04-21',
+        assignee: 'Jordan Lee',
+        squad: 'BUILD',
+        release: '',
+        milestone: false,
+        priority: 'Low',
+        blocked: false,
+        bugUrl: '',
+        draftComment: '',
+        comments: [],
+      },
+    ])
+  );
+
+  render(<App />);
+
+  expectSummaryValue('Total tasks', '3');
+  expectSummaryValue('Planned effort', '16h');
+  expectSummaryValue('Production ready', '2');
+  expectSummaryValue('Risks', '1');
+
+  fireEvent.change(screen.getByLabelText(/filter by stage/i), {
+    target: { value: 'Production' },
+  });
+
+  expectSummaryValue('Total tasks', '2');
+  expectSummaryValue('Planned effort', '11h');
+  expectSummaryValue('Production ready', '2');
+  expectSummaryValue('Risks', '1');
+
+  fireEvent.change(screen.getByLabelText(/search tasks/i), {
+    target: { value: 'gamma' },
+  });
+
+  expectSummaryValue('Total tasks', '1');
+  expectSummaryValue('Planned effort', '3h');
+  expectSummaryValue('Production ready', '1');
+  expectSummaryValue('Risks', '0');
 });
 
 test('uses a red header gradient for blocked or overdue tasks', () => {
@@ -873,7 +1006,7 @@ test('demo login rejects emails that are not registered resources', async () => 
     target: { value: 'unknown.person@example.com' },
   });
   fireEvent.change(screen.getByLabelText(/^password$/i), {
-    target: { value: 'Welcome@123' },
+    target: { value: CONTRIBUTOR_DEFAULT_PASSWORD },
   });
   fireEvent.click(screen.getByRole('button', { name: /sign in with email/i }));
 

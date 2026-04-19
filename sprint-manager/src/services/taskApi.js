@@ -9,7 +9,8 @@ import {
 const TASK_STORAGE_KEY = 'sprint-manager-tasks';
 const RESOURCE_STORAGE_KEY = 'sprint-manager-resources';
 const RESOURCE_AUTH_STORAGE_KEY = 'sprint-manager-resource-auth';
-const TEST_TEMP_PASSWORD = 'Welcome@123';
+const TEST_CONTRIBUTOR_PASSWORD = 'Welcome1';
+const TEST_MANAGER_PASSWORD = 'Welcome@123';
 
 function normalizeApiBase(url) {
   return (url || '').trim().replace(/\/+$/, '');
@@ -171,7 +172,11 @@ function hashPassword(password) {
   return `local-${(hash >>> 0).toString(16)}`;
 }
 
-function buildCachedAuthEntry(resource, password = TEST_TEMP_PASSWORD) {
+function getDefaultTestPasswordForResource(resource) {
+  return resource?.role === 'Manager' ? TEST_MANAGER_PASSWORD : TEST_CONTRIBUTOR_PASSWORD;
+}
+
+function buildCachedAuthEntry(resource, password = getDefaultTestPasswordForResource(resource)) {
   return {
     email: normalizeIdentity(resource.email),
     name: resource.name || '',
@@ -247,7 +252,7 @@ function upsertCachedResourceAuth(resource, password) {
   };
 
   if (!nextAuth[email].passwordHash) {
-    nextAuth[email].passwordHash = hashPassword(TEST_TEMP_PASSWORD);
+    nextAuth[email].passwordHash = hashPassword(getDefaultTestPasswordForResource(resource));
   }
 
   writeResourceAuthCache(nextAuth);
@@ -293,7 +298,7 @@ function renameCachedResourceAuth(previousResource, nextResource) {
   };
 
   if (!nextAuth[nextEmail].passwordHash) {
-    nextAuth[nextEmail].passwordHash = hashPassword(TEST_TEMP_PASSWORD);
+    nextAuth[nextEmail].passwordHash = hashPassword(getDefaultTestPasswordForResource(nextResource));
   }
 
   writeResourceAuthCache(nextAuth);
@@ -506,11 +511,25 @@ export async function loginWithPassword(email, password) {
 
 export async function changePassword(email, currentPassword, newPassword) {
   if (isTestEnvironment()) {
-    const resource = readTestResources().find(
-      (currentResource) => normalizeIdentity(currentResource.email) === normalizeIdentity(email)
+    const normalizedEmail = normalizeIdentity(email);
+    const resources = readTestResources();
+    const resource = resources.find(
+      (currentResource) => normalizeIdentity(currentResource.email) === normalizedEmail
     );
 
-    if (!resource || currentPassword !== TEST_TEMP_PASSWORD) {
+    if (!resource) {
+      throw new Error('Current password is incorrect.');
+    }
+
+    const currentAuth = readCachedResourceAuth();
+    const authEntry =
+      currentAuth[normalizedEmail] || syncResourceAuthCache(resources)[normalizedEmail];
+    const currentPasswordHash = hashPassword(currentPassword);
+    const expectedPasswordHash =
+      authEntry?.passwordHash ||
+      hashPassword(resource.temporaryPassword || getDefaultTestPasswordForResource(resource));
+
+    if (currentPasswordHash !== expectedPasswordHash) {
       throw new Error('Current password is incorrect.');
     }
 
@@ -585,13 +604,13 @@ export async function createResource(resource) {
   if (isTestEnvironment()) {
     const nextResource = normalizeResource({
       ...resource,
-      temporaryPassword: TEST_TEMP_PASSWORD,
+      temporaryPassword: getDefaultTestPasswordForResource(resource),
       requiresPasswordChange: true,
     });
     const currentResources = readTestResources();
     const nextResources = [...currentResources, nextResource];
     writeTestResources(nextResources);
-    upsertCachedResourceAuth(nextResource, TEST_TEMP_PASSWORD);
+    upsertCachedResourceAuth(nextResource, nextResource.temporaryPassword);
     return nextResource;
   }
 

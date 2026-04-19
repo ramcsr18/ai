@@ -3,7 +3,12 @@ import './App.css';
 import KanbanBoard from './components/KanbanBoard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { STAGES } from './data/seedData';
-import { canUserAccessTask, getCurrentTimestamp, normalizeTask } from './utils/taskUtils';
+import {
+  canUserAccessTask,
+  filterBoardTasks,
+  getCurrentTimestamp,
+  normalizeTask,
+} from './utils/taskUtils';
 import {
   createResource as createResourceRecord,
   createTask as createTaskRecord,
@@ -180,6 +185,37 @@ function EyeIcon({ visible }) {
           strokeLinecap="round"
         />
       )}
+    </svg>
+  );
+}
+
+function PasswordIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M6.8 8V6.7a3.2 3.2 0 1 1 6.4 0V8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <rect
+        x="4.3"
+        y="8"
+        width="11.4"
+        height="8.4"
+        rx="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <circle cx="10" cy="12.2" r="1.1" fill="currentColor" />
     </svg>
   );
 }
@@ -523,8 +559,8 @@ function TaskComposerDialog({
 
         <p className="muted-text task-dialog-copy">
           {isAdmin
-            ? 'New tasks join the board immediately and save to SQLite.'
-            : 'New tasks are automatically assigned to you and save to SQLite.'}
+            ? 'Create a new task and assign it to a resource'
+            : 'Create a new task and assign it to yourself'}
         </p>
 
         <form className="task-form task-form-wide task-form-compact" onSubmit={onSubmit}>
@@ -812,13 +848,31 @@ function LoginScreen() {
   );
 }
 
-function PasswordChangeScreen() {
+function PasswordDialog({ title, eyebrow, description, onClose, showSignOut = false }) {
   const { user, updatePassword, logout } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (!onClose) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -836,33 +890,122 @@ function PasswordChangeScreen() {
     try {
       await updatePassword({ currentPassword, newPassword });
       setError('');
-      setSuccess('Password updated. Redirecting to your board...');
+      setSuccess('Password updated successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      if (onClose) {
+        window.setTimeout(() => {
+          onClose();
+        }, 600);
+      }
     } catch (passwordError) {
       setSuccess('');
       setError(passwordError.message || 'Unable to update the password.');
     }
   };
 
+  const content = (
+    <>
+      <p className="eyebrow">{eyebrow}</p>
+      <h2>{title}</h2>
+      <p className="login-copy">{description || `${user?.name}, update your Sprint Board password.`}</p>
+
+      {error ? <div className="status-banner error-banner">{error}</div> : null}
+      {success ? <div className="status-banner info-banner">{success}</div> : null}
+
+      <form className="login-form demo-form" onSubmit={handleSubmit}>
+        <label htmlFor="current-password">Current password</label>
+        <input
+          id="current-password"
+          type="password"
+          value={currentPassword}
+          onChange={(event) => setCurrentPassword(event.target.value)}
+        />
+
+        <label htmlFor="new-password">New password</label>
+        <input
+          id="new-password"
+          type="password"
+          value={newPassword}
+          onChange={(event) => setNewPassword(event.target.value)}
+        />
+
+        <label htmlFor="confirm-password">Confirm new password</label>
+        <input
+          id="confirm-password"
+          type="password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+        />
+
+        <div className="password-dialog-actions">
+          {onClose ? (
+            <button type="button" className="ghost-button" onClick={onClose}>
+              Cancel
+            </button>
+          ) : null}
+          <button type="submit" className="primary-button">
+            Update password
+          </button>
+          {showSignOut ? (
+            <button type="button" className="ghost-button" onClick={logout}>
+              Sign out
+            </button>
+          ) : null}
+        </div>
+      </form>
+    </>
+  );
+
+  if (!onClose) {
+    return (
+      <main className="app-shell login-shell">
+        <section className="login-card">{content}</section>
+      </main>
+    );
+  }
+
   return (
-    <main className="app-shell login-shell">
-      <section className="login-card">
-        <p className="eyebrow">Password update required</p>
-        <h2>Change your temporary password</h2>
-        <p className="login-copy">
-          {user?.name}, your resource account requires a password change before you can use
-          Sprint Board.
+    <div className="dialog-backdrop" onClick={onClose}>
+      <section
+        className="resources-dialog password-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Change password"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="resources-dialog-header">
+          <div>
+            <p className="eyebrow">{eyebrow}</p>
+            <h2>{title}</h2>
+          </div>
+          <button
+            type="button"
+            className="ghost-button icon-button"
+            onClick={onClose}
+            aria-label="Close change password dialog"
+            title="Close"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+        <p className="login-copy password-dialog-copy">
+          {description || `${user?.name}, update your Sprint Board password.`}
         </p>
 
         {error ? <div className="status-banner error-banner">{error}</div> : null}
         {success ? <div className="status-banner info-banner">{success}</div> : null}
 
-        <form className="login-form demo-form" onSubmit={handleSubmit}>
+        <form className="login-form demo-form password-dialog-form" onSubmit={handleSubmit}>
           <label htmlFor="current-password">Current password</label>
           <input
             id="current-password"
             type="password"
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
+            autoFocus
           />
 
           <label htmlFor="new-password">New password</label>
@@ -881,15 +1024,30 @@ function PasswordChangeScreen() {
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
 
-          <button type="submit" className="primary-button">
-            Update password
-          </button>
-          <button type="button" className="ghost-button" onClick={logout}>
-            Sign out
-          </button>
+          <div className="password-dialog-actions">
+            <button type="button" className="ghost-button" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="primary-button">
+              Update password
+            </button>
+          </div>
         </form>
       </section>
-    </main>
+    </div>
+  );
+}
+
+function PasswordChangeScreen() {
+  const { user } = useAuth();
+
+  return (
+    <PasswordDialog
+      title="Change your temporary password"
+      eyebrow="Password update required"
+      description={`${user?.name}, your resource account requires a password change before you can use Sprint Board.`}
+      showSignOut
+    />
   );
 }
 
@@ -905,6 +1063,7 @@ function Dashboard() {
   const [reportMessage, setReportMessage] = useState('');
   const [isResourceDialogOpen, setIsResourceDialogOpen] = useState(false);
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [stageFilter, setStageFilter] = useState('all');
@@ -915,7 +1074,7 @@ function Dashboard() {
     effort: 8,
     start: '2026-04-20',
     end: '2026-04-24',
-    squad: 'Platform',
+    squad: 'BUILD',
     release: '',
     milestone: false,
     priority: 'Medium',
@@ -996,6 +1155,11 @@ function Dashboard() {
   }, [isAdmin, resources, user.name]);
 
   const accessibleTasks = tasks.filter((task) => canUserAccessTask(user, task));
+  const filteredTasks = filterBoardTasks(accessibleTasks, {
+    searchTerm,
+    assigneeFilter,
+    stageFilter,
+  });
   const availableAssignees = isAdmin
     ? [
         ...new Set(
@@ -1112,6 +1276,7 @@ function Dashboard() {
       setNewTask((current) => ({
         ...current,
         title: '',
+        squad: 'BUILD',
         bugUrl: '',
         comments: [],
         draftComment: '',
@@ -1297,19 +1462,18 @@ function Dashboard() {
     }
   };
 
-  const totalEffort = accessibleTasks.reduce((sum, task) => sum + task.effort, 0);
-  const productionCount = accessibleTasks.filter((task) => task.status === 'Production').length;
-  const blockedCount = accessibleTasks.filter((task) => task.blocked).length;
+  const totalEffort = filteredTasks.reduce((sum, task) => sum + task.effort, 0);
+  const productionCount = filteredTasks.filter((task) => task.status === 'Production').length;
+  const blockedCount = filteredTasks.filter((task) => task.blocked).length;
 
   return (
     <main className="app-shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Employee delivery workspace</p>
-          <h1>Sprint Board</h1>
+          <p className="eyebrow">FRE Delivery Workspace</p>
+          <h1>FRE Sprint Board</h1>
           <p className="topbar-copy">
-            Sticky notes can be dragged between stages, and cards stack automatically by
-            priority and due date.
+            Manage your tasks and prioritize them effectively.
           </p>
         </div>
 
@@ -1328,6 +1492,15 @@ function Dashboard() {
                 <ResourceIcon />
               </button>
             ) : null}
+            <button
+              type="button"
+              className="ghost-button icon-button"
+              onClick={() => setIsPasswordDialogOpen(true)}
+              aria-label="Change password"
+              title="Change password"
+            >
+              <PasswordIcon />
+            </button>
             <button type="button" className="ghost-button" onClick={logout}>
               Sign out
             </button>
@@ -1396,28 +1569,28 @@ function Dashboard() {
       <section className="summary-grid" aria-label="Sprint summary">
         <article
           className="summary-card"
-          title="Total tasks available to you in the current workspace."
+          title="Total tasks matching the current filters."
         >
           <p className="eyebrow">Total tasks</p>
-          <strong>{accessibleTasks.length}</strong>
+          <strong>{filteredTasks.length}</strong>
         </article>
         <article
           className="summary-card"
-          title="Total planned effort across all tasks you can access."
+          title="Total planned effort across tasks matching the current filters."
         >
           <p className="eyebrow">Planned effort</p>
           <strong>{totalEffort}h</strong>
         </article>
         <article
           className="summary-card"
-          title="Tasks already delivered to production."
+          title="Production tasks matching the current filters."
         >
           <p className="eyebrow">Production ready</p>
           <strong className="summary-value-green">{productionCount}</strong>
         </article>
         <article
           className="summary-card"
-          title="Blocked tasks currently needing attention."
+          title="Blocked tasks matching the current filters."
         >
           <p className="eyebrow">Risks</p>
           <strong className="summary-value-red">{blockedCount}</strong>
@@ -1472,6 +1645,15 @@ function Dashboard() {
           setNewTask={setNewTask}
           onSubmit={handleTaskDialogSubmit}
           onClose={() => setIsTaskDialogOpen(false)}
+        />
+      ) : null}
+
+      {isPasswordDialogOpen ? (
+        <PasswordDialog
+          title="Change password"
+          eyebrow="Account security"
+          description="Update your Sprint Board password."
+          onClose={() => setIsPasswordDialogOpen(false)}
         />
       ) : null}
     </main>

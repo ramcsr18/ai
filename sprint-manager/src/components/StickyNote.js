@@ -155,6 +155,7 @@ function TrashIcon() {
 export default function StickyNote({
   task,
   isActive,
+  sequenceNumber,
   stackIndex,
   stackDepth,
   isAdmin,
@@ -408,6 +409,9 @@ export default function StickyNote({
           style={{ background: headerBackground }}
         >
           <div className="note-panel-meta-left">
+            <span className="note-sequence-badge" title={`Task ${sequenceNumber} in ${task.status}`}>
+              #{sequenceNumber}
+            </span>
             {isEditingArea ? (
               <input
                 id={`task-area-${task.id}`}

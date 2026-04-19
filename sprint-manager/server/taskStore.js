@@ -71,7 +71,8 @@ ensureColumnExists('resources', 'role', "TEXT NOT NULL DEFAULT 'Contributor'");
 ensureColumnExists('resources', 'password_hash', "TEXT NOT NULL DEFAULT ''");
 ensureColumnExists('resources', 'require_password_change', 'INTEGER NOT NULL DEFAULT 1');
 
-const DEFAULT_BOOTSTRAP_PASSWORD = 'Welcome@123';
+const DEFAULT_MANAGER_BOOTSTRAP_PASSWORD = 'Welcome@123';
+const DEFAULT_CONTRIBUTOR_BOOTSTRAP_PASSWORD = 'Welcome1';
 const REQUIRED_MANAGER_EMAIL = 'ram.mohan.yaratapally@oracle.com';
 const REQUIRED_MANAGER_NAME = 'Ram Mohan Yaratapally';
 
@@ -450,6 +451,18 @@ function generateTemporaryPassword(length = 12) {
   return Array.from(bytes, (value) => characters[value % characters.length]).join('');
 }
 
+function getDefaultPasswordForRole(role, mode = 'create') {
+  const normalizedRole = normalizeResourceRole(role);
+
+  if (normalizedRole === 'Contributor') {
+    return DEFAULT_CONTRIBUTOR_BOOTSTRAP_PASSWORD;
+  }
+
+  return mode === 'bootstrap'
+    ? DEFAULT_MANAGER_BOOTSTRAP_PASSWORD
+    : generateTemporaryPassword();
+}
+
 function buildRoleAwareUser(resource) {
   const registrationRole = normalizeResourceRole(resource?.role);
 
@@ -593,9 +606,7 @@ function resourceToRow(resource) {
 }
 
 function buildResourceWithPassword(resource, temporaryPassword, mode = 'create') {
-  const passwordToUse =
-    temporaryPassword ||
-    (mode === 'bootstrap' ? DEFAULT_BOOTSTRAP_PASSWORD : generateTemporaryPassword());
+  const passwordToUse = temporaryPassword || getDefaultPasswordForRole(resource?.role, mode);
 
   return {
     ...resource,
@@ -603,6 +614,34 @@ function buildResourceWithPassword(resource, temporaryPassword, mode = 'create')
     requiresPasswordChange: true,
     temporaryPassword: passwordToUse,
   };
+}
+
+function normalizeContributorBootstrapPasswords() {
+  const resources = selectAllResourcesStatement.all().map((resource) => getResourceById(resource.id));
+
+  resources.forEach((resource) => {
+    if (!resource || normalizeResourceRole(resource.role) !== 'Contributor') {
+      return;
+    }
+
+    if (!resource.requiresPasswordChange) {
+      return;
+    }
+
+    if (verifyPassword(DEFAULT_CONTRIBUTOR_BOOTSTRAP_PASSWORD, resource.passwordHash)) {
+      return;
+    }
+
+    upsertResourceStatement.run(
+      resourceToRow(
+        buildResourceWithPassword(
+          resource,
+          DEFAULT_CONTRIBUTOR_BOOTSTRAP_PASSWORD,
+          'bootstrap'
+        )
+      )
+    );
+  });
 }
 
 function seedIfEmpty() {
@@ -852,7 +891,7 @@ function ensureRequiredManagerResource() {
           email: REQUIRED_MANAGER_EMAIL,
           role: 'Manager',
         },
-        DEFAULT_BOOTSTRAP_PASSWORD,
+        DEFAULT_MANAGER_BOOTSTRAP_PASSWORD,
         'bootstrap'
       )
     )
@@ -868,15 +907,14 @@ function initializeResourcePasswords() {
     }
 
     upsertResourceStatement.run(
-      resourceToRow(
-        buildResourceWithPassword(resource, DEFAULT_BOOTSTRAP_PASSWORD, 'bootstrap')
-      )
+      resourceToRow(buildResourceWithPassword(resource, null, 'bootstrap'))
     );
   });
 }
 
 seedIfEmpty();
 initializeResourcePasswords();
+normalizeContributorBootstrapPasswords();
 ensureRequiredManagerResource();
 initializeSequencesFromData();
 

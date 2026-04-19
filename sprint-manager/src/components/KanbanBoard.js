@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import StickyNote from './StickyNote';
 import { STAGES } from '../data/seedData';
-import { shouldDisplayTask, sortTasksForStage } from '../utils/taskUtils';
+import { filterBoardTasks, sortTasksForStage } from '../utils/taskUtils';
 
 export default function KanbanBoard({
   tasks,
@@ -17,24 +17,10 @@ export default function KanbanBoard({
   onTaskDelete,
 }) {
   const [activeTaskIds, setActiveTaskIds] = useState({});
-  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-  const displayableTasks = tasks.filter((task) => shouldDisplayTask(task));
-
-  const visibleTasks = displayableTasks.filter((task) => {
-    const commentText = task.comments.map((comment) => comment.text).join(' ').toLowerCase();
-    const matchesSearch =
-      !normalizedSearchTerm ||
-      task.title.toLowerCase().includes(normalizedSearchTerm) ||
-      task.squad.toLowerCase().includes(normalizedSearchTerm) ||
-      commentText.includes(normalizedSearchTerm);
-
-    const matchesAssignee =
-      assigneeFilter === 'all' || task.assignee === assigneeFilter;
-
-    const matchesStage = stageFilter === 'all' || task.status === stageFilter;
-
-    return matchesSearch && matchesAssignee && matchesStage;
+  const visibleTasks = filterBoardTasks(tasks, {
+    searchTerm,
+    assigneeFilter,
+    stageFilter,
   });
 
   const allowTaskEditing = Boolean(user);
@@ -112,6 +98,7 @@ export default function KanbanBoard({
                     key={task.id}
                     task={task}
                     isActive={task.id === activeTaskId}
+                    sequenceNumber={index + 1}
                     stackIndex={index}
                     stackDepth={stageTasks.length}
                     isAdmin={user?.role === 'admin'}

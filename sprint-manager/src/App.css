@@ -259,6 +259,10 @@
   width: min(880px, 100%);
 }
 
+.password-dialog {
+  width: min(520px, 100%);
+}
+
 .resources-dialog-header {
   display: flex;
   align-items: flex-start;
@@ -269,6 +273,15 @@
 
 .task-dialog-copy {
   margin: 0 0 18px;
+}
+
+.password-dialog-copy {
+  margin: 0 0 10px;
+}
+
+.password-dialog-form {
+  margin-top: 0;
+  padding-top: 12px;
 }
 
 .resource-add-form {
@@ -340,6 +353,14 @@
   gap: 10px;
   grid-column: 1 / -1;
   margin-top: 4px;
+}
+
+.password-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .create-task-trigger {
@@ -580,6 +601,7 @@
 .note-panel-meta-left {
   flex: 1 1 auto;
   justify-content: flex-start;
+  gap: 6px;
 }
 
 .note-panel-meta-center {
@@ -695,6 +717,22 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.note-sequence-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(20, 52, 43, 0.16);
+  color: #183229;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  flex: 0 0 auto;
 }
 
 .header-edit-input-title {

@@ -180,6 +180,33 @@ export function shouldDisplayTask(task, now = new Date()) {
   return now.getTime() - endTime <= TEN_DAYS_IN_MS;
 }
 
+export function filterBoardTasks(
+  tasks,
+  { searchTerm = '', assigneeFilter = 'all', stageFilter = 'all' } = {}
+) {
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+  return (Array.isArray(tasks) ? tasks : [])
+    .filter((task) => shouldDisplayTask(task))
+    .filter((task) => {
+      const title = String(task.title || '').toLowerCase();
+      const area = String(task.squad || '').toLowerCase();
+      const commentText = (Array.isArray(task.comments) ? task.comments : [])
+        .map((comment) => comment.text)
+        .join(' ')
+        .toLowerCase();
+      const matchesSearch =
+        !normalizedSearchTerm ||
+        title.includes(normalizedSearchTerm) ||
+        area.includes(normalizedSearchTerm) ||
+        commentText.includes(normalizedSearchTerm);
+      const matchesAssignee = assigneeFilter === 'all' || task.assignee === assigneeFilter;
+      const matchesStage = stageFilter === 'all' || task.status === stageFilter;
+
+      return matchesSearch && matchesAssignee && matchesStage;
+    });
+}
+
 export function sortTasksForStage(tasks) {
   return [...tasks].sort((left, right) => {
     const priorityDifference =
