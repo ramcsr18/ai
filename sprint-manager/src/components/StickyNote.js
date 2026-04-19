@@ -9,6 +9,7 @@ import {
 } from '../utils/taskUtils';
 
 const statusColors = {
+  General: '#ede9fe',
   Ingestion: '#ffe8aa',
   Analysis: '#c5f6fa',
   Design: '#eebefa',
@@ -20,6 +21,7 @@ const statusColors = {
 };
 
 const statusHeaderColors = {
+  General: 'linear-gradient(135deg, #f3efff, #8b7bd6)',
   Ingestion: 'linear-gradient(135deg, #fff1be, #e1bf5e)',
   Analysis: 'linear-gradient(135deg, #daf8fb, #7ac8d1)',
   Design: 'linear-gradient(135deg, #f6ddfd, #c18ad9)',
@@ -596,52 +598,53 @@ export default function StickyNote({
             </div>
           ) : null}
         </div>
-        <div className="note-title-band">
-          <div className="note-title-content">
-            {isEditingTitle ? (
-              <textarea
-                id={`task-title-${task.id}`}
-                className="header-edit-input header-edit-input-title"
-                value={draftTitle}
-                onChange={(event) => setDraftTitle(event.target.value)}
-                onBlur={submitTitle}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-                    event.preventDefault();
-                    submitTitle();
-                  }
+      </div>
 
-                  if (event.key === 'Escape') {
-                    event.preventDefault();
-                    setDraftTitle(task.title);
-                    setIsEditingTitle(false);
-                  }
-                }}
-                autoFocus
-                aria-label={`Title for ${task.title}`}
-                title="Task title"
-                rows={4}
-              />
-            ) : (
-              <button
-                type="button"
-                className={`header-editable note-title ${titleToneClass}`}
-                onDoubleClick={() => {
-                  if (canEditTitle) {
-                    setIsEditingTitle(true);
-                  }
-                }}
-                disabled={!canEditTitle}
-                title={
-                  canEditTitle
-                    ? `Due ${formatFullDate(task.end)} • Priority ${task.priority} • Double-click to edit title`
-                    : `Due ${formatFullDate(task.end)} • Priority ${task.priority}`
+      <div className="note-title-band">
+        <div className="note-title-content">
+          {isEditingTitle ? (
+            <textarea
+              id={`task-title-${task.id}`}
+              className="header-edit-input header-edit-input-title"
+              value={draftTitle}
+              onChange={(event) => setDraftTitle(event.target.value)}
+              onBlur={submitTitle}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                  event.preventDefault();
+                  submitTitle();
                 }
-              >
-                {task.title}
-              </button>
-            )}
-          </div>
+
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  setDraftTitle(task.title);
+                  setIsEditingTitle(false);
+                }
+              }}
+              autoFocus
+              aria-label={`Title for ${task.title}`}
+              title="Task title"
+              rows={4}
+            />
+          ) : (
+            <button
+              type="button"
+              className={`header-editable note-title ${titleToneClass}`}
+              onDoubleClick={() => {
+                if (canEditTitle) {
+                  setIsEditingTitle(true);
+                }
+              }}
+              disabled={!canEditTitle}
+              title={
+                canEditTitle
+                  ? `Due ${formatFullDate(task.end)} • Priority ${task.priority} • Double-click to edit title`
+                  : `Due ${formatFullDate(task.end)} • Priority ${task.priority}`
+              }
+            >
+              {task.title}
+            </button>
+          )}
         </div>
       </div>
 

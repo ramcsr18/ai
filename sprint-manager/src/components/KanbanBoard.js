@@ -85,10 +85,10 @@ export default function KanbanBoard({
             onDrop={(event) => handleDrop(event, stage)}
           >
             <header className="kanban-column-header">
-              <div>
+              <div className="kanban-column-heading">
                 <h3 id={`column-${stage}`}>{stage}</h3>
+                <span className="column-count">{stageTasks.length}</span>
               </div>
-              <span className="column-count">{stageTasks.length}</span>
             </header>
 
             <div className="kanban-cards">

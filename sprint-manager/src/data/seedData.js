@@ -1,4 +1,5 @@
 export const STAGES = [
+  'General',
   'Ingestion',
   'Analysis',
   'Design',
