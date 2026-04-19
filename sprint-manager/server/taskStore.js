@@ -1,7 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
-const { INITIAL_TASKS } = require('./seedData');
+const { INITIAL_RESOURCES, INITIAL_TASKS } = require('./seedData');
 
 const dataDirectory = path.join(__dirname, 'data');
 const databasePath = path.join(dataDirectory, 'sprint-board.sqlite');
@@ -36,6 +37,43 @@ database.exec(`
     next_value INTEGER NOT NULL
   )
 `);
+
+database.exec(`
+  CREATE TABLE IF NOT EXISTS resources (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT 'Contributor',
+    password_hash TEXT NOT NULL DEFAULT '',
+    require_password_change INTEGER NOT NULL DEFAULT 1
+  )
+`);
+
+function listTableColumns(tableName) {
+  return database
+    .prepare(`PRAGMA table_info(${tableName})`)
+    .all()
+    .map((column) => column.name);
+}
+
+function ensureColumnExists(tableName, columnName, columnDefinition) {
+  const existingColumns = listTableColumns(tableName);
+
+  if (existingColumns.includes(columnName)) {
+    return;
+  }
+
+  database.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`);
+}
+
+ensureColumnExists('resources', 'email', "TEXT NOT NULL DEFAULT ''");
+ensureColumnExists('resources', 'role', "TEXT NOT NULL DEFAULT 'Contributor'");
+ensureColumnExists('resources', 'password_hash', "TEXT NOT NULL DEFAULT ''");
+ensureColumnExists('resources', 'require_password_change', 'INTEGER NOT NULL DEFAULT 1');
+
+const DEFAULT_BOOTSTRAP_PASSWORD = 'Welcome@123';
+const REQUIRED_MANAGER_EMAIL = 'ram.mohan.yaratapally@oracle.com';
+const REQUIRED_MANAGER_NAME = 'Ram Mohan Yaratapally';
 
 const upsertTaskStatement = database.prepare(`
   INSERT INTO tasks (
@@ -131,6 +169,91 @@ const selectTaskStatement = database.prepare(`
 
 const countTasksStatement = database.prepare('SELECT COUNT(*) AS count FROM tasks');
 const deleteAllTasksStatement = database.prepare('DELETE FROM tasks');
+const deleteTaskStatement = database.prepare('DELETE FROM tasks WHERE id = ?');
+const selectAllResourcesStatement = database.prepare(`
+  SELECT
+    id,
+    name,
+    email,
+    role,
+    require_password_change
+  FROM resources
+  ORDER BY LOWER(name), LOWER(email), id
+`);
+const selectResourceStatement = database.prepare(`
+  SELECT
+    id,
+    name,
+    email,
+    role,
+    password_hash,
+    require_password_change
+  FROM resources
+  WHERE id = ?
+`);
+const selectResourceByEmailForAuthStatement = database.prepare(`
+  SELECT
+    id,
+    name,
+    email,
+    role,
+    password_hash,
+    require_password_change
+  FROM resources
+  WHERE LOWER(email) = LOWER(?)
+  LIMIT 1
+`);
+const countResourcesStatement = database.prepare('SELECT COUNT(*) AS count FROM resources');
+const deleteAllResourcesStatement = database.prepare('DELETE FROM resources');
+const selectResourceByNameStatement = database.prepare(`
+  SELECT id
+  FROM resources
+  WHERE LOWER(name) = LOWER(?)
+    AND id != ?
+  LIMIT 1
+`);
+const selectResourceByEmailStatement = database.prepare(`
+  SELECT id
+  FROM resources
+  WHERE LOWER(email) = LOWER(?)
+    AND id != ?
+  LIMIT 1
+`);
+const upsertResourceStatement = database.prepare(`
+  INSERT INTO resources (
+    id,
+    name,
+    email,
+    role,
+    password_hash,
+    require_password_change
+  ) VALUES (
+    @id,
+    @name,
+    @email,
+    @role,
+    @password_hash,
+    @require_password_change
+  )
+  ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    email = excluded.email,
+    role = excluded.role,
+    password_hash = excluded.password_hash,
+    require_password_change = excluded.require_password_change
+`);
+const deleteResourceStatement = database.prepare('DELETE FROM resources WHERE id = ?');
+const updateResourcePasswordStatement = database.prepare(`
+  UPDATE resources
+  SET password_hash = ?,
+      require_password_change = 0
+  WHERE id = ?
+`);
+const renameAssignedTasksStatement = database.prepare(`
+  UPDATE tasks
+  SET assignee = ?
+  WHERE assignee = ?
+`);
 const selectSequenceStatement = database.prepare(`
   SELECT next_value
   FROM app_sequences
@@ -215,6 +338,7 @@ function initializeSequencesFromData() {
   const rows = selectAllTasksStatement.all();
   let maxTaskId = 0;
   let maxCommentId = 0;
+  let maxResourceId = 0;
 
   rows.forEach((row) => {
     maxTaskId = Math.max(maxTaskId, extractNumericSeed(row.id) || 0);
@@ -232,8 +356,13 @@ function initializeSequencesFromData() {
     }
   });
 
+  selectAllResourcesStatement.all().forEach((resource) => {
+    maxResourceId = Math.max(maxResourceId, extractNumericSeed(resource.id) || 0);
+  });
+
   initializeSequence('task_id', maxTaskId + 1 || 1);
   initializeSequence('comment_id', maxCommentId + 1 || 1);
+  initializeSequence('resource_id', maxResourceId + 1 || 1);
 }
 
 function normalizeComment(comment, index, taskId) {
@@ -291,6 +420,84 @@ function normalizeTask(task) {
   };
 }
 
+function normalizeResourceRole(value) {
+  return String(value || '').trim().toLowerCase() === 'manager' ? 'Manager' : 'Contributor';
+}
+
+function createPasswordHash(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(String(password), salt, 64).toString('hex');
+
+  return `scrypt$${salt}$${hash}`;
+}
+
+function verifyPassword(password, passwordHash) {
+  const [algorithm, salt, storedHash] = String(passwordHash || '').split('$');
+
+  if (algorithm !== 'scrypt' || !salt || !storedHash) {
+    return false;
+  }
+
+  const candidateHash = crypto.scryptSync(String(password), salt, 64).toString('hex');
+
+  return crypto.timingSafeEqual(Buffer.from(candidateHash, 'hex'), Buffer.from(storedHash, 'hex'));
+}
+
+function generateTemporaryPassword(length = 12) {
+  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+  const bytes = crypto.randomBytes(length);
+
+  return Array.from(bytes, (value) => characters[value % characters.length]).join('');
+}
+
+function buildRoleAwareUser(resource) {
+  const registrationRole = normalizeResourceRole(resource?.role);
+
+  return {
+    id: resource.id,
+    name: resource.name,
+    email: resource.email,
+    role: registrationRole === 'Manager' ? 'admin' : 'user',
+    registrationRole,
+  };
+}
+
+function sanitizeResource(resource) {
+  if (!resource) {
+    return null;
+  }
+
+  const { passwordHash, ...safeResource } = resource;
+  return safeResource;
+}
+
+function normalizeResource(resource) {
+  const normalizedResourceId =
+    reserveSequenceValue('resource_id', resource.id) ??
+    (resource.id !== undefined && resource.id !== null && String(resource.id).trim()
+      ? String(resource.id).trim()
+      : getNextSequenceValue('resource_id'));
+  const name = String(resource.name || '').trim();
+  const email = String(resource.email || '').trim().toLowerCase();
+  const role = normalizeResourceRole(resource.role);
+  const passwordHash = String(resource.passwordHash || resource.password_hash || '').trim();
+  const requiresPasswordChange =
+    resource.requiresPasswordChange !== undefined
+      ? Boolean(resource.requiresPasswordChange)
+      : resource.require_password_change !== undefined
+        ? Boolean(resource.require_password_change)
+        : true;
+
+  return {
+    id: normalizedResourceId,
+    name,
+    email,
+    role,
+    passwordHash,
+    requiresPasswordChange,
+  };
+}
+
 function rowToTask(row) {
   if (!row) {
     return null;
@@ -323,6 +530,21 @@ function rowToTask(row) {
   });
 }
 
+function rowToResource(row) {
+  if (!row) {
+    return null;
+  }
+
+  return normalizeResource({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    passwordHash: row.password_hash,
+    requiresPasswordChange: Boolean(row.require_password_change),
+  });
+}
+
 function taskToRow(task) {
   const normalizedTask = normalizeTask(task);
 
@@ -349,19 +571,62 @@ function taskToRow(task) {
   };
 }
 
-function seedIfEmpty() {
-  const { count } = countTasksStatement.get();
+function resourceToRow(resource) {
+  const normalizedResource = normalizeResource(resource);
 
-  if (count > 0) {
+  if (!normalizedResource.name) {
+    throw new Error('Resource name is required.');
+  }
+
+  if (!normalizedResource.email) {
+    throw new Error('Resource email is required.');
+  }
+
+  return {
+    id: String(normalizedResource.id),
+    name: normalizedResource.name,
+    email: normalizedResource.email,
+    role: normalizedResource.role,
+    password_hash: normalizedResource.passwordHash,
+    require_password_change: normalizedResource.requiresPasswordChange ? 1 : 0,
+  };
+}
+
+function buildResourceWithPassword(resource, temporaryPassword, mode = 'create') {
+  const passwordToUse =
+    temporaryPassword ||
+    (mode === 'bootstrap' ? DEFAULT_BOOTSTRAP_PASSWORD : generateTemporaryPassword());
+
+  return {
+    ...resource,
+    passwordHash: createPasswordHash(passwordToUse),
+    requiresPasswordChange: true,
+    temporaryPassword: passwordToUse,
+  };
+}
+
+function seedIfEmpty() {
+  const { count: taskCount } = countTasksStatement.get();
+  const { count: resourceCount } = countResourcesStatement.get();
+
+  if (taskCount > 0 && resourceCount > 0) {
     return;
   }
 
   database.exec('BEGIN');
 
   try {
-    INITIAL_TASKS.forEach((task) => {
-      upsertTaskStatement.run(taskToRow(task));
-    });
+    if (resourceCount === 0) {
+      INITIAL_RESOURCES.forEach((resource) => {
+        upsertResourceStatement.run(resourceToRow(resource));
+      });
+    }
+
+    if (taskCount === 0) {
+      INITIAL_TASKS.forEach((task) => {
+        upsertTaskStatement.run(taskToRow(task));
+      });
+    }
     database.exec('COMMIT');
   } catch (error) {
     database.exec('ROLLBACK');
@@ -373,8 +638,16 @@ function listTasks() {
   return selectAllTasksStatement.all().map(rowToTask);
 }
 
+function listResources() {
+  return selectAllResourcesStatement.all().map((row) => sanitizeResource(getResourceById(row.id)));
+}
+
 function getTaskById(id) {
-  return rowToTask(selectTaskStatement.get(id));
+  return rowToTask(selectTaskStatement.get(String(id)));
+}
+
+function getResourceById(id) {
+  return rowToResource(selectResourceStatement.get(String(id)));
 }
 
 function saveTask(task) {
@@ -382,6 +655,123 @@ function saveTask(task) {
   upsertTaskStatement.run(row);
 
   return getTaskById(row.id);
+}
+
+function deleteTask(id) {
+  deleteTaskStatement.run(String(id));
+  return listTasks();
+}
+
+function saveResource(resource) {
+  const existingResource =
+    resource?.id !== undefined && resource?.id !== null
+      ? getResourceById(String(resource.id))
+      : null;
+  const resourceWithCredentials = existingResource
+    ? {
+        ...resource,
+        passwordHash: resource.passwordHash || existingResource.passwordHash,
+        requiresPasswordChange:
+          resource.requiresPasswordChange !== undefined
+            ? resource.requiresPasswordChange
+            : existingResource.requiresPasswordChange,
+      }
+    : buildResourceWithPassword(resource);
+  const row = resourceToRow(resourceWithCredentials);
+  const conflictingNameResource = selectResourceByNameStatement.get(row.name, row.id);
+  const conflictingEmailResource = selectResourceByEmailStatement.get(row.email, row.id);
+
+  if (conflictingNameResource) {
+    throw new Error('A resource with this name already exists.');
+  }
+
+  if (conflictingEmailResource) {
+    throw new Error('A resource with this email already exists.');
+  }
+
+  database.exec('BEGIN');
+
+  try {
+    upsertResourceStatement.run(row);
+
+    if (
+      existingResource &&
+      existingResource.name &&
+      existingResource.name !== row.name
+    ) {
+      renameAssignedTasksStatement.run(row.name, existingResource.name);
+    }
+
+    database.exec('COMMIT');
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+
+  const savedResource = sanitizeResource(getResourceById(row.id));
+
+  if (resourceWithCredentials.temporaryPassword) {
+    return {
+      ...savedResource,
+      temporaryPassword: resourceWithCredentials.temporaryPassword,
+    };
+  }
+
+  return savedResource;
+}
+
+function authenticateResource(email, password) {
+  const resource = rowToResource(selectResourceByEmailForAuthStatement.get(String(email || '').trim()));
+
+  if (!resource) {
+    throw new Error('Invalid email or password.');
+  }
+
+  if (!verifyPassword(password, resource.passwordHash)) {
+    throw new Error('Invalid email or password.');
+  }
+
+  return {
+    user: {
+      ...buildRoleAwareUser(resource),
+      mustChangePassword: resource.requiresPasswordChange,
+      authProvider: 'local',
+    },
+  };
+}
+
+function changeResourcePassword(email, currentPassword, nextPassword) {
+  const resource = rowToResource(selectResourceByEmailForAuthStatement.get(String(email || '').trim()));
+
+  if (!resource) {
+    throw new Error('Unable to update the password for this resource.');
+  }
+
+  if (!verifyPassword(currentPassword, resource.passwordHash)) {
+    throw new Error('Current password is incorrect.');
+  }
+
+  const trimmedNextPassword = String(nextPassword || '').trim();
+
+  if (trimmedNextPassword.length < 8) {
+    throw new Error('New password must be at least 8 characters long.');
+  }
+
+  updateResourcePasswordStatement.run(createPasswordHash(trimmedNextPassword), String(resource.id));
+  const updatedResource = getResourceById(resource.id);
+
+  return {
+    user: {
+      ...buildRoleAwareUser(updatedResource),
+      mustChangePassword: false,
+      authProvider: 'local',
+    },
+  };
+}
+
+function deleteResource(id) {
+  deleteResourceStatement.run(String(id));
+  return listResources();
 }
 
 function replaceTasks(tasks) {
@@ -418,14 +808,91 @@ function resetTasks() {
   return listTasks();
 }
 
+function resetResources() {
+  database.exec('BEGIN');
+
+  try {
+    deleteAllResourcesStatement.run();
+    INITIAL_RESOURCES.forEach((resource) => {
+      upsertResourceStatement.run(resourceToRow(resource));
+    });
+    database.exec('COMMIT');
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+
+  return listResources();
+}
+
+function ensureRequiredManagerResource() {
+  const existingManager = rowToResource(
+    selectResourceByEmailForAuthStatement.get(REQUIRED_MANAGER_EMAIL)
+  );
+
+  if (existingManager) {
+    if (existingManager.role === 'Manager') {
+      return;
+    }
+
+    saveResource({
+      ...existingManager,
+      role: 'Manager',
+      passwordHash: existingManager.passwordHash,
+      requiresPasswordChange: existingManager.requiresPasswordChange,
+    });
+    return;
+  }
+
+  upsertResourceStatement.run(
+    resourceToRow(
+      buildResourceWithPassword(
+        {
+          name: REQUIRED_MANAGER_NAME,
+          email: REQUIRED_MANAGER_EMAIL,
+          role: 'Manager',
+        },
+        DEFAULT_BOOTSTRAP_PASSWORD,
+        'bootstrap'
+      )
+    )
+  );
+}
+
+function initializeResourcePasswords() {
+  const resources = selectAllResourcesStatement.all().map((resource) => getResourceById(resource.id));
+
+  resources.forEach((resource) => {
+    if (resource.passwordHash) {
+      return;
+    }
+
+    upsertResourceStatement.run(
+      resourceToRow(
+        buildResourceWithPassword(resource, DEFAULT_BOOTSTRAP_PASSWORD, 'bootstrap')
+      )
+    );
+  });
+}
+
 seedIfEmpty();
+initializeResourcePasswords();
+ensureRequiredManagerResource();
 initializeSequencesFromData();
 
 module.exports = {
+  authenticateResource,
+  changeResourcePassword,
   databasePath,
+  deleteTask,
+  deleteResource,
+  listResources,
   listTasks,
   normalizeTask,
+  normalizeResource,
   replaceTasks,
+  resetResources,
   resetTasks,
+  saveResource,
   saveTask,
 };

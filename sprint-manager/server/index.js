@@ -1,7 +1,21 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
-const { listTasks, normalizeTask, resetTasks, saveTask, databasePath } = require('./taskStore');
+const {
+  authenticateResource,
+  changeResourcePassword,
+  deleteTask,
+  deleteResource,
+  listResources,
+  listTasks,
+  normalizeResource,
+  normalizeTask,
+  resetTasks,
+  saveResource,
+  saveTask,
+  databasePath,
+} = require('./taskStore');
+const { sendOpenTasksReport, startDailySummaryScheduler } = require('./reporting');
 
 const port = Number(process.env.PORT) || 4000;
 const buildDirectory = path.join(__dirname, '..', 'build');
@@ -10,7 +24,7 @@ function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   });
   response.end(JSON.stringify(payload));
@@ -104,10 +118,48 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === 'GET' && pathname === '/api/resources') {
+      sendJson(response, 200, { resources: listResources() });
+      return;
+    }
+
+    if (request.method === 'POST' && pathname === '/api/auth/login') {
+      const payload = await readJsonBody(request);
+      const authResult = authenticateResource(payload.email, payload.password);
+      sendJson(response, 200, authResult);
+      return;
+    }
+
+    if (request.method === 'POST' && pathname === '/api/auth/change-password') {
+      const payload = await readJsonBody(request);
+      const authResult = changeResourcePassword(
+        payload.email,
+        payload.currentPassword,
+        payload.newPassword
+      );
+      sendJson(response, 200, authResult);
+      return;
+    }
+
     if (request.method === 'POST' && pathname === '/api/tasks') {
       const task = normalizeTask(await readJsonBody(request));
       const savedTask = saveTask(task);
       sendJson(response, 201, { task: savedTask });
+      return;
+    }
+
+    if (request.method === 'POST' && pathname === '/api/resources') {
+      const resource = normalizeResource(await readJsonBody(request));
+      const savedResource = saveResource(resource);
+      sendJson(response, 201, { resource: savedResource });
+      return;
+    }
+
+    if (request.method === 'POST' && pathname === '/api/reports/open-tasks') {
+      const payload = await readJsonBody(request);
+      const requester = payload && payload.requester ? payload.requester : {};
+      const report = await sendOpenTasksReport(requester);
+      sendJson(response, 200, report);
       return;
     }
 
@@ -116,6 +168,26 @@ const server = http.createServer(async (request, response) => {
       const task = normalizeTask({ ...(await readJsonBody(request)), id: taskId });
       const savedTask = saveTask(task);
       sendJson(response, 200, { task: savedTask });
+      return;
+    }
+
+    if (request.method === 'PUT' && pathname.startsWith('/api/resources/')) {
+      const resourceId = decodeURIComponent(pathname.replace('/api/resources/', ''));
+      const resource = normalizeResource({ ...(await readJsonBody(request)), id: resourceId });
+      const savedResource = saveResource(resource);
+      sendJson(response, 200, { resource: savedResource });
+      return;
+    }
+
+    if (request.method === 'DELETE' && pathname.startsWith('/api/resources/')) {
+      const resourceId = decodeURIComponent(pathname.replace('/api/resources/', ''));
+      sendJson(response, 200, { resources: deleteResource(resourceId) });
+      return;
+    }
+
+    if (request.method === 'DELETE' && pathname.startsWith('/api/tasks/')) {
+      const taskId = decodeURIComponent(pathname.replace('/api/tasks/', ''));
+      sendJson(response, 200, { tasks: deleteTask(taskId) });
       return;
     }
 
@@ -156,3 +228,5 @@ server.listen(port, () => {
   console.log(`Sprint Board server listening on http://localhost:${port}`);
   console.log(`SQLite database: ${databasePath}`);
 });
+
+startDailySummaryScheduler();

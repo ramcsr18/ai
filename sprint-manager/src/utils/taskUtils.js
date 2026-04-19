@@ -26,6 +26,39 @@ function normalizeComment(taskId, comment, index) {
   };
 }
 
+export function normalizeResource(resource) {
+  if (!resource || typeof resource !== 'object') {
+    return null;
+  }
+
+  const name = String(resource.name || '').trim();
+  const email = String(resource.email || '').trim().toLowerCase();
+  const role = String(resource.role || 'Contributor').trim() === 'Manager' ? 'Manager' : 'Contributor';
+  const requiresPasswordChange = Boolean(
+    resource.requiresPasswordChange ?? resource.require_password_change ?? true
+  );
+  const temporaryPassword = String(resource.temporaryPassword || '').trim();
+
+  if (!name) {
+    return null;
+  }
+
+  return {
+    id: resource.id || `resource-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    name,
+    email,
+    role,
+    requiresPasswordChange,
+    temporaryPassword,
+  };
+}
+
+export function normalizeResources(resources) {
+  return (Array.isArray(resources) ? resources : [])
+    .map((resource) => normalizeResource(resource))
+    .filter(Boolean);
+}
+
 export function normalizeTask(task) {
   const comments = Array.isArray(task.comments)
     ? task.comments
@@ -207,6 +240,20 @@ export function formatFullDate(dateString) {
   }).format(date);
 }
 
+export function isTaskOverdue(task, now = new Date()) {
+  if (!task?.end) {
+    return false;
+  }
+
+  const dueTime = Date.parse(task.end);
+
+  if (Number.isNaN(dueTime)) {
+    return false;
+  }
+
+  return dueTime < now.getTime();
+}
+
 export function getTaskTitleTone(task) {
   const now = new Date();
   const dueDate = new Date(task.end);
@@ -215,7 +262,7 @@ export function getTaskTitleTone(task) {
   if (!Number.isNaN(dueTime)) {
     const daysUntilDue = Math.ceil((dueTime - now.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (daysUntilDue < 0) {
+    if (isTaskOverdue(task, now)) {
       return 'title-overdue';
     }
 

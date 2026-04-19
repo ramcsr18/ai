@@ -9,12 +9,32 @@ export const STAGES = [
   'Completed',
 ];
 
-export const TEAM_MEMBERS = [
-  'Avery Chen',
-  'Priya Nair',
-  'Mateo Silva',
-  'Jordan Lee',
-  'Nina Patel',
+export const INITIAL_RESOURCES = [
+  {
+    id: 1,
+    name: 'Avery Chen',
+    email: 'avery.chen@example.com',
+  },
+  {
+    id: 2,
+    name: 'Priya Nair',
+    email: 'priya.nair@example.com',
+  },
+  {
+    id: 3,
+    name: 'Mateo Silva',
+    email: 'mateo.silva@example.com',
+  },
+  {
+    id: 4,
+    name: 'Jordan Lee',
+    email: 'jordan.lee@example.com',
+  },
+  {
+    id: 5,
+    name: 'Nina Patel',
+    email: 'nina.patel@example.com',
+  },
 ];
 
 export const INITIAL_TASKS = [

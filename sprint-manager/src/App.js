@@ -2,13 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import KanbanBoard from './components/KanbanBoard';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { STAGES, TEAM_MEMBERS } from './data/seedData';
+import { STAGES } from './data/seedData';
 import { canUserAccessTask, getCurrentTimestamp, normalizeTask } from './utils/taskUtils';
 import {
+  createResource as createResourceRecord,
   createTask as createTaskRecord,
+  deleteTask as deleteTaskRecord,
+  deleteResource as deleteResourceRecord,
+  fetchResources,
   fetchTasks,
+  getInitialResourceSnapshot,
   getInitialTaskSnapshot,
-  resetTasks as resetTaskRecords,
+  saveResource as saveResourceRecord,
   saveTask,
 } from './services/taskApi';
 
@@ -49,445 +54,480 @@ function ExternalLinkIcon() {
   );
 }
 
-function LoginScreen() {
-  const {
-    loginDemo,
-    startOracleLogin,
-    authStatus,
-    authError,
-    isOracleConfigured,
-    canUseDemoLogin,
-  } = useAuth();
-  const [credentials, setCredentials] = useState({
-    name: '',
-    role: 'user',
-  });
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    loginDemo(credentials);
-  };
-
+function ResourceIcon() {
   return (
-    <main className="app-shell login-shell">
-      <section className="hero-card">
-        <p className="eyebrow">Sprint Intelligence</p>
-        <h1>Sprint Board</h1>
-        <p className="hero-copy">
-          Move sticky notes across delivery stages, triage work by priority and due date,
-          and keep a dated activity trail on every task.
-        </p>
-
-        <div className="hero-highlights">
-          <div>
-            <strong>Oracle SSO-ready</strong>
-            <span>Uses Oracle IAM / IDCS OAuth endpoints with PKCE for browser sign-in.</span>
-          </div>
-          <div>
-            <strong>SQLite persistence</strong>
-            <span>Board edits, task metadata, and comment drafts persist in a shared database.</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="login-card">
-        <p className="eyebrow">Workspace access</p>
-        <h2>Sign in with Oracle SSO</h2>
-        <p className="login-copy">
-          Employee access is validated from the Oracle profile email before the workspace is
-          unlocked.
-        </p>
-
-        {authError ? <div className="status-banner error-banner">{authError}</div> : null}
-
-        <button
-          type="button"
-          className="primary-button"
-          onClick={startOracleLogin}
-          disabled={!isOracleConfigured || authStatus === 'redirecting' || authStatus === 'authenticating'}
-        >
-          {authStatus === 'redirecting'
-            ? 'Redirecting to Oracle'
-            : authStatus === 'authenticating'
-              ? 'Completing sign-in'
-              : 'Continue with Oracle SSO'}
-        </button>
-
-        {!isOracleConfigured ? (
-          <p className="muted-text">
-            Configure the Oracle environment variables to enable enterprise SSO.
-          </p>
-        ) : null}
-
-        {canUseDemoLogin ? (
-          <form className="login-form demo-form" onSubmit={handleSubmit}>
-            <p className="eyebrow">Development fallback</p>
-
-            <label htmlFor="name">Display name</label>
-            <input
-              id="name"
-              type="text"
-              value={credentials.name}
-              onChange={(event) =>
-                setCredentials((current) => ({ ...current, name: event.target.value }))
-              }
-              placeholder="Alex Morgan"
-            />
-
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              value={credentials.role}
-              onChange={(event) =>
-                setCredentials((current) => ({ ...current, role: event.target.value }))
-              }
-            >
-              <option value="user">Contributor</option>
-              <option value="admin">Admin</option>
-            </select>
-
-            <button type="submit" className="ghost-button">
-              Enter demo workspace
-            </button>
-          </form>
-        ) : null}
-      </section>
-    </main>
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10 10a3.1 3.1 0 1 0 0-6.2 3.1 3.1 0 0 0 0 6.2Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M3.8 17a6.2 6.2 0 0 1 12.4 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
-function Dashboard() {
-  const { user, logout } = useAuth();
-  const isAdmin = user.role === 'admin';
-  const [tasks, setTasks] = useState(getInitialTaskSnapshot);
-  const tasksRef = useRef(tasks);
-  const [isLoadingTasks, setIsLoadingTasks] = useState(process.env.NODE_ENV !== 'test');
-  const [taskError, setTaskError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [assigneeFilter, setAssigneeFilter] = useState('all');
-  const [stageFilter, setStageFilter] = useState('all');
-  const [newTask, setNewTask] = useState({
-    title: '',
-    assignee: isAdmin ? TEAM_MEMBERS[0] : user.name,
-    status: STAGES[0],
-    effort: 8,
-    start: '2026-04-20',
-    end: '2026-04-24',
-    squad: 'Platform',
-    release: '',
-    milestone: false,
-    priority: 'Medium',
-    blocked: false,
-    bugUrl: '',
-    comments: [],
-    draftComment: '',
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10 4v12M4 10h12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M5.8 6.5h8.4l-.6 9a1.2 1.2 0 0 1-1.2 1.1H7.6a1.2 1.2 0 0 1-1.2-1.1l-.6-9Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M4.8 5.2h10.4M7.6 5.2V3.8h4.8v1.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M5 5l10 10M15 5 5 15"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function EyeIcon({ visible }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M2.4 10s2.8-4.8 7.6-4.8S17.6 10 17.6 10 14.8 14.8 10 14.8 2.4 10 2.4 10Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="10"
+        cy="10"
+        r="2.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      {visible ? null : (
+        <path
+          d="M4 16 16 4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      )}
+    </svg>
+  );
+}
+
+function getDefaultAssignee(resources, fallbackAssignee = '') {
+  return resources[0]?.name || fallbackAssignee;
+}
+
+function getResourceOptionLabel(resource) {
+  return resource.email ? `${resource.name} - ${resource.email}` : resource.name;
+}
+
+function ResourceManager({
+  resources,
+  tasks,
+  onCreateResource,
+  onSaveResource,
+  onDeleteResource,
+  onClose,
+}) {
+  const [newResource, setNewResource] = useState({
+    name: '',
+    email: '',
+    role: 'Contributor',
   });
+  const [drafts, setDrafts] = useState({});
+  const draftsRef = useRef({});
 
   useEffect(() => {
-    tasksRef.current = tasks;
-  }, [tasks]);
+    const nextDrafts = resources.reduce((result, resource) => {
+        result[resource.id] = {
+          name: resource.name,
+          email: resource.email,
+          role: resource.role || 'Contributor',
+        };
+        return result;
+      }, {});
+
+    draftsRef.current = nextDrafts;
+    setDrafts(nextDrafts);
+  }, [resources]);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'test') {
-      setIsLoadingTasks(false);
-      return undefined;
-    }
-
-    let isCancelled = false;
-
-    const loadTasks = async () => {
-      try {
-        setIsLoadingTasks(true);
-        const loadedTasks = await fetchTasks();
-
-        if (!isCancelled) {
-          setTasks(loadedTasks);
-          setTaskError('');
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          setTaskError(error.message || 'Unable to load tasks from SQLite.');
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoadingTasks(false);
-        }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
       }
     };
 
-    void loadTasks();
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      isCancelled = true;
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [onClose]);
 
-  const accessibleTasks = tasks.filter((task) => canUserAccessTask(user, task));
-  const availableAssignees = [...new Set(accessibleTasks.map((task) => task.assignee))];
-
-  const prepareTask = (task) =>
-    normalizeTask({
-      ...task,
-      milestone: task.status === 'Completed' ? task.milestone : false,
-    });
-
-  const updateTask = async (taskId, patch) => {
-    const currentTask = tasksRef.current.find((task) => task.id === taskId);
-
-    if (!currentTask || !canUserAccessTask(user, currentTask)) {
-      return;
-    }
-
-    const nextPatch =
-      patch.status === 'Completed' && currentTask.status !== 'Completed'
-        ? { ...patch, end: getCurrentTimestamp() }
-        : patch;
-
-    const nextTask = prepareTask({ ...currentTask, ...nextPatch });
-
-    setTasks((currentTasks) =>
-      currentTasks.map((task) => (task.id === taskId ? nextTask : task))
-    );
-    setTaskError('');
-
-    try {
-      if (process.env.NODE_ENV === 'test') {
-        await saveTask(nextTask);
-        return;
-      }
-
-      const persistedTask = await saveTask(nextTask);
-      setTasks((currentTasks) =>
-        currentTasks.map((task) => (task.id === taskId ? persistedTask : task))
-      );
-    } catch (error) {
-      setTasks((currentTasks) =>
-        currentTasks.map((task) => (task.id === taskId ? currentTask : task))
-      );
-      setTaskError(error.message || 'Unable to save task changes to SQLite.');
-    }
-  };
-
-  const updateCommentDraft = (taskId, draftComment) => {
-    void updateTask(taskId, { draftComment });
-  };
-
-  const addComment = (taskId, comment) => {
-    const currentTask = tasksRef.current.find((task) => task.id === taskId);
-
-    if (!currentTask || !canUserAccessTask(user, currentTask)) {
-      return;
-    }
-
-    void updateTask(taskId, {
-      comments: [comment, ...currentTask.comments],
-      draftComment: '',
-    });
-  };
-
-  const updateComment = (taskId, commentId, nextText) => {
-    const currentTask = tasksRef.current.find((task) => task.id === taskId);
-
-    if (!currentTask || !canUserAccessTask(user, currentTask)) {
-      return;
-    }
-
-    const trimmedText = nextText.trim();
-
-    if (!trimmedText) {
-      return;
-    }
-
-    const nextComments = currentTask.comments.map((comment) =>
-      comment.id === commentId ? { ...comment, text: trimmedText } : comment
-    );
-
-    void updateTask(taskId, {
-      comments: nextComments,
-    });
-  };
-
-  const addTask = async (event) => {
-    event.preventDefault();
-
-    const title = newTask.title.trim();
-
-    if (!title) {
-      return;
-    }
-
-    const taskToCreate = prepareTask({
-      ...newTask,
-      assignee: isAdmin ? newTask.assignee : user.name,
-      title,
-      effort: Number(newTask.effort),
-      id: `task-${Date.now()}`,
-    });
-
-    try {
-      const createdTask = await createTaskRecord(taskToCreate);
-      setTasks((currentTasks) => [createdTask, ...currentTasks]);
-      setTaskError('');
-      setNewTask((current) => ({
+  const updateDraft = (resourceId, patch) => {
+    setDrafts((current) => {
+      const nextDrafts = {
         ...current,
-        title: '',
-        bugUrl: '',
-        comments: [],
-        draftComment: '',
-        effort: 8,
-        blocked: false,
-        status: STAGES[0],
-        release: '',
-        milestone: false,
-        priority: 'Medium',
-        assignee: isAdmin ? TEAM_MEMBERS[0] : user.name,
-      }));
-    } catch (error) {
-      setTaskError(error.message || 'Unable to create the task in SQLite.');
-    }
+        [resourceId]: {
+          ...(current[resourceId] || {}),
+          ...patch,
+        },
+      };
+
+      draftsRef.current = nextDrafts;
+      return nextDrafts;
+    });
   };
 
-  const resetBoard = async () => {
-    try {
-      const resetTasks = await resetTaskRecords();
-      setTasks(resetTasks);
-      setTaskError('');
-    } catch (error) {
-      setTaskError(error.message || 'Unable to reset the task board.');
-    }
+  const resetDraft = (resource) => {
+    setDrafts((current) => {
+      const nextDrafts = {
+        ...current,
+        [resource.id]: {
+          name: resource.name,
+          email: resource.email,
+          role: resource.role || 'Contributor',
+        },
+      };
+
+      draftsRef.current = nextDrafts;
+      return nextDrafts;
+    });
   };
 
-  const totalEffort = accessibleTasks.reduce((sum, task) => sum + task.effort, 0);
-  const productionCount = accessibleTasks.filter((task) => task.status === 'Production').length;
-  const blockedCount = accessibleTasks.filter((task) => task.blocked).length;
+  const saveDraft = async (resource) => {
+    const draft = draftsRef.current[resource.id] || {
+      name: resource.name,
+      email: resource.email,
+      role: resource.role || 'Contributor',
+    };
+    const nextName = draft.name.trim();
+    const nextEmail = draft.email.trim().toLowerCase();
+    const nextRole = draft.role === 'Manager' ? 'Manager' : 'Contributor';
+
+    if (!nextName || !nextEmail) {
+      resetDraft(resource);
+      return;
+    }
+
+    if (
+      nextName === resource.name &&
+      nextEmail === resource.email &&
+      nextRole === (resource.role || 'Contributor')
+    ) {
+      return;
+    }
+
+    await onSaveResource({
+      ...resource,
+      name: nextName,
+      email: nextEmail,
+      role: nextRole,
+    });
+  };
+
+  const handleAddResource = async (event) => {
+    event.preventDefault();
+    const name = newResource.name.trim();
+    const email = newResource.email.trim().toLowerCase();
+    const role = newResource.role === 'Manager' ? 'Manager' : 'Contributor';
+
+    if (!name || !email) {
+      return;
+    }
+
+    const wasCreated = await onCreateResource({ name, email, role });
+
+    if (wasCreated) {
+      setNewResource({
+        name: '',
+        email: '',
+        role: 'Contributor',
+      });
+    }
+  };
 
   return (
-    <main className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Employee delivery workspace</p>
-          <h1>Sprint Board</h1>
-          <p className="topbar-copy">
-            Sticky notes can be dragged between stages, and cards stack automatically by
-            priority and due date.
-          </p>
-        </div>
-
-        <div className="user-card">
-          <span className="user-chip">{user.role === 'admin' ? 'Admin' : 'Contributor'}</span>
-          <span className="user-name">{user.name}</span>
-          <span className="muted-text">{user.email}</span>
-          <button type="button" className="ghost-button" onClick={logout}>
-            Sign out
+    <div className="dialog-backdrop" onClick={onClose}>
+      <section
+        className="resources-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Resource management"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="resources-dialog-header">
+          <div>
+            <p className="eyebrow">Admin controls</p>
+            <h2>Resources</h2>
+          </div>
+          <button
+            type="button"
+            className="ghost-button icon-button"
+            onClick={onClose}
+            aria-label="Close resource management"
+            title="Close"
+          >
+            <CloseIcon />
           </button>
         </div>
-      </header>
 
-      {taskError ? <div className="status-banner error-banner">{taskError}</div> : null}
-      {isLoadingTasks ? (
-        <div className="status-banner info-banner">Loading tasks from SQLite...</div>
-      ) : null}
+        <form className="resource-add-form" onSubmit={handleAddResource}>
+          <input
+            id="resource-name"
+            type="text"
+            value={newResource.name}
+            onChange={(event) =>
+              setNewResource((current) => ({ ...current, name: event.target.value }))
+            }
+            placeholder="Name"
+            aria-label="Resource name"
+          />
+          <input
+            id="resource-email"
+            type="email"
+            value={newResource.email}
+            onChange={(event) =>
+              setNewResource((current) => ({ ...current, email: event.target.value }))
+            }
+            placeholder="Email"
+            aria-label="Resource email"
+          />
+          <select
+            id="resource-role"
+            value={newResource.role}
+            onChange={(event) =>
+              setNewResource((current) => ({ ...current, role: event.target.value }))
+            }
+            aria-label="Resource role"
+          >
+            <option value="Contributor">Contributor</option>
+            <option value="Manager">Manager</option>
+          </select>
+          <button
+            type="submit"
+            className="primary-button icon-button resource-add-button"
+            aria-label="Add resource"
+            title="Add resource"
+          >
+            <PlusIcon />
+          </button>
+        </form>
 
-      <section className="toolbar-card">
-        <div className="toolbar-grid">
-          <div className="toolbar-field">
-            <label htmlFor="search">Search tasks</label>
-            <input
-              id="search"
-              type="search"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search title, squad, or comments"
-            />
-          </div>
+        <div className="resource-list" aria-label="Team resources">
+          {resources.map((resource) => {
+            const assignedTaskCount = tasks.filter((task) => task.assignee === resource.name).length;
+            const draft = drafts[resource.id] || {
+              name: resource.name,
+              email: resource.email,
+              role: resource.role || 'Contributor',
+            };
 
-          <div className="toolbar-field">
-            <label htmlFor="assignee">Assignee</label>
-            <select
-              id="assignee"
-              value={assigneeFilter}
-              onChange={(event) => setAssigneeFilter(event.target.value)}
-            >
-              <option value="all">All owners</option>
-              {availableAssignees.map((member) => (
-                <option key={member} value={member}>
-                  {member}
-                </option>
-              ))}
-            </select>
-          </div>
+            return (
+              <article key={resource.id} className="resource-row">
+                <div className="resource-row-fields">
+                  <input
+                    id={`resource-name-${resource.id}`}
+                    type="text"
+                    value={draft.name}
+                    onChange={(event) => updateDraft(resource.id, { name: event.target.value })}
+                    onBlur={() => void saveDraft(resource)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        void saveDraft(resource);
+                      }
 
-          <div className="toolbar-field">
-            <label htmlFor="stage">Stage</label>
-            <select
-              id="stage"
-              value={stageFilter}
-              onChange={(event) => setStageFilter(event.target.value)}
-              aria-label="Filter by stage"
-              title="Filter by stage"
-            >
-              <option value="all">All stages</option>
-              {STAGES.map((stage) => (
-                <option key={stage} value={stage}>
-                  {stage}
-                </option>
-              ))}
-            </select>
-          </div>
+                      if (event.key === 'Escape') {
+                        event.preventDefault();
+                        resetDraft(resource);
+                      }
+                    }}
+                    placeholder="Name"
+                    aria-label={`Resource name for ${resource.name}`}
+                  />
+                  <input
+                    id={`resource-email-${resource.id}`}
+                    type="email"
+                    value={draft.email}
+                    onChange={(event) => updateDraft(resource.id, { email: event.target.value })}
+                    onBlur={() => void saveDraft(resource)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        void saveDraft(resource);
+                      }
 
-          <div className="toolbar-actions">
-            <button type="button" className="ghost-button" onClick={resetBoard}>
-              Reset
-            </button>
-          </div>
+                      if (event.key === 'Escape') {
+                        event.preventDefault();
+                        resetDraft(resource);
+                      }
+                    }}
+                    placeholder="Email"
+                    aria-label={`Resource email for ${resource.name}`}
+                  />
+                  <select
+                    id={`resource-role-${resource.id}`}
+                    value={draft.role}
+                    onChange={(event) => updateDraft(resource.id, { role: event.target.value })}
+                    onBlur={() => void saveDraft(resource)}
+                    aria-label={`Resource role for ${resource.name}`}
+                  >
+                    <option value="Contributor">Contributor</option>
+                    <option value="Manager">Manager</option>
+                  </select>
+                </div>
+
+                <div className="resource-row-actions">
+                  <span className="resource-task-count" title="Tasks currently assigned to this resource.">
+                    {assignedTaskCount}
+                  </span>
+                  <button
+                    type="button"
+                    className="ghost-button icon-button"
+                    onClick={() => onDeleteResource(resource.id)}
+                    aria-label={`Delete ${resource.name}`}
+                    title="Delete resource"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
+    </div>
+  );
+}
 
-      <section className="summary-grid" aria-label="Sprint summary">
-        <article
-          className="summary-card"
-          title="Total tasks available to you in the current workspace."
-        >
-          <p className="eyebrow">Total tasks</p>
-          <strong>{accessibleTasks.length}</strong>
-        </article>
-        <article
-          className="summary-card"
-          title="Total planned effort across all tasks you can access."
-        >
-          <p className="eyebrow">Planned effort</p>
-          <strong>{totalEffort}h</strong>
-        </article>
-        <article
-          className="summary-card"
-          title="Tasks already delivered to production."
-        >
-          <p className="eyebrow">Production ready</p>
-          <strong className="summary-value-green">{productionCount}</strong>
-        </article>
-        <article
-          className="summary-card"
-          title="Blocked tasks currently needing attention."
-        >
-          <p className="eyebrow">Risks</p>
-          <strong className="summary-value-red">{blockedCount}</strong>
-        </article>
-      </section>
+function TaskComposerDialog({
+  isAdmin,
+  resources,
+  user,
+  newTask,
+  setNewTask,
+  onSubmit,
+  onClose,
+}) {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
 
-      <section className="composer-card">
-        <div className="composer-header">
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="dialog-backdrop" onClick={onClose}>
+      <section
+        className="resources-dialog task-compose-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Create task"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="resources-dialog-header">
           <div>
             <p className="eyebrow">{isAdmin ? 'Admin controls' : 'My work'}</p>
             <h2>Create task</h2>
           </div>
-          <p className="muted-text">
-            {isAdmin
-              ? 'New tasks join the board immediately and autosave.'
-              : 'New tasks are automatically assigned to you.'}
-          </p>
+          <button
+            type="button"
+            className="ghost-button icon-button"
+            onClick={onClose}
+            aria-label="Close create task dialog"
+            title="Close"
+          >
+            <CloseIcon />
+          </button>
         </div>
 
-        <form className="task-form task-form-wide task-form-compact" onSubmit={addTask}>
+        <p className="muted-text task-dialog-copy">
+          {isAdmin
+            ? 'New tasks join the board immediately and save to SQLite.'
+            : 'New tasks are automatically assigned to you and save to SQLite.'}
+        </p>
+
+        <form className="task-form task-form-wide task-form-compact" onSubmit={onSubmit}>
           <label htmlFor="task-title">Title</label>
           <input
             id="task-title"
@@ -497,6 +537,7 @@ function Dashboard() {
               setNewTask((current) => ({ ...current, title: event.target.value }))
             }
             placeholder="Sprint retro follow-ups"
+            autoFocus
           />
 
           <label htmlFor="task-squad">Area</label>
@@ -518,11 +559,15 @@ function Dashboard() {
                 setNewTask((current) => ({ ...current, assignee: event.target.value }))
               }
             >
-              {TEAM_MEMBERS.map((member) => (
-                <option key={member} value={member}>
-                  {member}
-                </option>
-              ))}
+              {resources.length ? (
+                resources.map((resource) => (
+                  <option key={resource.id} value={resource.name}>
+                    {getResourceOptionLabel(resource)}
+                  </option>
+                ))
+              ) : (
+                <option value={user.name}>{user.name}</option>
+              )}
             </select>
           ) : (
             <input id="task-owner" type="text" value={user.name} disabled />
@@ -647,17 +692,755 @@ function Dashboard() {
             Milestone
           </label>
 
+          <div className="task-dialog-actions">
+            <button type="button" className="ghost-button" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="primary-button">
+              Add task
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+function LoginScreen() {
+  const {
+    loginDemo,
+    authError,
+    isOracleConfigured,
+    oracleConfigError,
+    canUseDemoLogin,
+  } = useAuth();
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+  });
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    void loginDemo(credentials);
+  };
+
+  return (
+    <main className="app-shell login-shell">
+      <section className="hero-card">
+        <p className="eyebrow">Sprint Intelligence</p>
+        <h1>Sprint Board</h1>
+        <p className="hero-copy">
+          Move sticky notes across delivery stages, triage work by priority and due date,
+          and keep a dated activity trail on every task.
+        </p>
+
+        <div className="hero-highlights">
+          <div>
+            <strong>{isOracleConfigured ? 'Oracle SSO enabled' : 'Oracle SSO setup required'}</strong>
+            <span>
+              Uses Oracle IAM / IDCS OAuth endpoints with PKCE for employee browser sign-in.
+            </span>
+          </div>
+          <div>
+            <strong>SQLite persistence</strong>
+            <span>Board edits, task metadata, and comment drafts persist in a shared database.</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="login-card">
+        <p className="eyebrow">Workspace access</p>
+        <h2>Sign in with your resource account</h2>
+        <p className="login-copy">
+          Sprint Board access is currently available only through resource email and password
+          accounts registered by a manager.
+        </p>
+
+        {authError ? <div className="status-banner error-banner">{authError}</div> : null}
+
+        {!isOracleConfigured ? (
+          <p className="muted-text">
+            {oracleConfigError}
+          </p>
+        ) : null}
+
+        {canUseDemoLogin ? (
+          <form className="login-form demo-form" onSubmit={handleSubmit}>
+            <p className="eyebrow">Development fallback</p>
+
+            <label htmlFor="email">Resource email</label>
+            <input
+              id="email"
+              type="email"
+              value={credentials.email}
+              onChange={(event) =>
+                setCredentials((current) => ({ ...current, email: event.target.value }))
+              }
+              placeholder="avery.chen@example.com"
+            />
+
+            <label htmlFor="password">Password</label>
+            <div className="password-input-row">
+              <input
+                id="password"
+                type={isPasswordVisible ? 'text' : 'password'}
+                value={credentials.password}
+                onChange={(event) =>
+                  setCredentials((current) => ({ ...current, password: event.target.value }))
+                }
+                placeholder="Temporary or saved password"
+              />
+              <button
+                type="button"
+                className="ghost-button icon-button password-visibility-toggle"
+                onClick={() => setIsPasswordVisible((current) => !current)}
+                aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                title={isPasswordVisible ? 'Hide password' : 'Show password'}
+              >
+                <EyeIcon visible={isPasswordVisible} />
+              </button>
+            </div>
+
+            <button type="submit" className="ghost-button">
+              Sign in with email
+            </button>
+          </form>
+        ) : null}
+      </section>
+    </main>
+  );
+}
+
+function PasswordChangeScreen() {
+  const { user, updatePassword, logout } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (newPassword.trim().length < 8) {
+      setError('New password must be at least 8 characters long.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirmation must match.');
+      return;
+    }
+
+    try {
+      await updatePassword({ currentPassword, newPassword });
+      setError('');
+      setSuccess('Password updated. Redirecting to your board...');
+    } catch (passwordError) {
+      setSuccess('');
+      setError(passwordError.message || 'Unable to update the password.');
+    }
+  };
+
+  return (
+    <main className="app-shell login-shell">
+      <section className="login-card">
+        <p className="eyebrow">Password update required</p>
+        <h2>Change your temporary password</h2>
+        <p className="login-copy">
+          {user?.name}, your resource account requires a password change before you can use
+          Sprint Board.
+        </p>
+
+        {error ? <div className="status-banner error-banner">{error}</div> : null}
+        {success ? <div className="status-banner info-banner">{success}</div> : null}
+
+        <form className="login-form demo-form" onSubmit={handleSubmit}>
+          <label htmlFor="current-password">Current password</label>
+          <input
+            id="current-password"
+            type="password"
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+          />
+
+          <label htmlFor="new-password">New password</label>
+          <input
+            id="new-password"
+            type="password"
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+          />
+
+          <label htmlFor="confirm-password">Confirm new password</label>
+          <input
+            id="confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+          />
+
           <button type="submit" className="primary-button">
-            Add task
+            Update password
+          </button>
+          <button type="button" className="ghost-button" onClick={logout}>
+            Sign out
           </button>
         </form>
+      </section>
+    </main>
+  );
+}
+
+function Dashboard() {
+  const { user, logout } = useAuth();
+  const isAdmin = user.role === 'admin';
+  const [tasks, setTasks] = useState(getInitialTaskSnapshot);
+  const tasksRef = useRef(tasks);
+  const [resources, setResources] = useState(getInitialResourceSnapshot);
+  const resourcesRef = useRef(resources);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(process.env.NODE_ENV !== 'test');
+  const [taskError, setTaskError] = useState('');
+  const [reportMessage, setReportMessage] = useState('');
+  const [isResourceDialogOpen, setIsResourceDialogOpen] = useState(false);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
+  const [stageFilter, setStageFilter] = useState('all');
+  const [newTask, setNewTask] = useState({
+    title: '',
+    assignee: isAdmin ? getDefaultAssignee(getInitialResourceSnapshot(), user.name) : user.name,
+    status: STAGES[0],
+    effort: 8,
+    start: '2026-04-20',
+    end: '2026-04-24',
+    squad: 'Platform',
+    release: '',
+    milestone: false,
+    priority: 'Medium',
+    blocked: false,
+    bugUrl: '',
+    comments: [],
+    draftComment: '',
+  });
+
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
+
+  useEffect(() => {
+    resourcesRef.current = resources;
+  }, [resources]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'test') {
+      setIsLoadingTasks(false);
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    const loadTasks = async () => {
+      try {
+        setIsLoadingTasks(true);
+        const loadedTasks = await fetchTasks();
+        const loadedResources = await fetchResources();
+
+        if (!isCancelled) {
+          setTasks(loadedTasks);
+          setResources(loadedResources);
+          setTaskError('');
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setTaskError(error.message || 'Unable to load tasks from SQLite.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingTasks(false);
+        }
+      }
+    };
+
+    void loadTasks();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      return;
+    }
+
+    const defaultAssignee = getDefaultAssignee(resources, user.name);
+
+    setNewTask((current) => {
+      if (!defaultAssignee) {
+        return current;
+      }
+
+      const hasCurrentAssignee = resources.some((resource) => resource.name === current.assignee);
+
+      if (hasCurrentAssignee) {
+        return current;
+      }
+
+      return {
+        ...current,
+        assignee: defaultAssignee,
+      };
+    });
+  }, [isAdmin, resources, user.name]);
+
+  const accessibleTasks = tasks.filter((task) => canUserAccessTask(user, task));
+  const availableAssignees = isAdmin
+    ? [
+        ...new Set(
+          [...resources.map((resource) => resource.name), ...accessibleTasks.map((task) => task.assignee)]
+            .filter(Boolean)
+        ),
+      ]
+    : [user.name].filter(Boolean);
+
+  const prepareTask = (task) =>
+    normalizeTask({
+      ...task,
+      milestone: task.status === 'Completed' ? task.milestone : false,
+    });
+
+  const updateTask = async (taskId, patch) => {
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask || !canUserAccessTask(user, currentTask)) {
+      return;
+    }
+
+    const nextPatch =
+      patch.status === 'Completed' && currentTask.status !== 'Completed'
+        ? { ...patch, end: getCurrentTimestamp() }
+        : patch;
+
+    const nextTask = prepareTask({ ...currentTask, ...nextPatch });
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => (task.id === taskId ? nextTask : task))
+    );
+    setTaskError('');
+    setReportMessage('');
+
+    try {
+      if (process.env.NODE_ENV === 'test') {
+        await saveTask(nextTask);
+        return;
+      }
+
+      const persistedTask = await saveTask(nextTask);
+      setTasks((currentTasks) =>
+        currentTasks.map((task) => (task.id === taskId ? persistedTask : task))
+      );
+    } catch (error) {
+      setTasks((currentTasks) =>
+        currentTasks.map((task) => (task.id === taskId ? currentTask : task))
+      );
+      setTaskError(error.message || 'Unable to save task changes to SQLite.');
+    }
+  };
+
+  const updateCommentDraft = (taskId, draftComment) => {
+    void updateTask(taskId, { draftComment });
+  };
+
+  const addComment = (taskId, comment) => {
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask || !canUserAccessTask(user, currentTask)) {
+      return;
+    }
+
+    void updateTask(taskId, {
+      comments: [comment, ...currentTask.comments],
+      draftComment: '',
+    });
+  };
+
+  const updateComment = (taskId, commentId, nextText) => {
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask || !canUserAccessTask(user, currentTask)) {
+      return;
+    }
+
+    const trimmedText = nextText.trim();
+
+    if (!trimmedText) {
+      return;
+    }
+
+    const nextComments = currentTask.comments.map((comment) =>
+      comment.id === commentId ? { ...comment, text: trimmedText } : comment
+    );
+
+    void updateTask(taskId, {
+      comments: nextComments,
+    });
+  };
+
+  const addTask = async (event) => {
+    event.preventDefault();
+
+    const title = newTask.title.trim();
+
+    if (!title) {
+      return false;
+    }
+
+    const taskToCreate = prepareTask({
+      ...newTask,
+      assignee: isAdmin ? newTask.assignee : user.name,
+      title,
+      effort: Number(newTask.effort),
+      id: `task-${Date.now()}`,
+    });
+
+    try {
+      const createdTask = await createTaskRecord(taskToCreate);
+      setTasks((currentTasks) => [createdTask, ...currentTasks]);
+      setTaskError('');
+      setNewTask((current) => ({
+        ...current,
+        title: '',
+        bugUrl: '',
+        comments: [],
+        draftComment: '',
+        effort: 8,
+        blocked: false,
+        status: STAGES[0],
+        release: '',
+        milestone: false,
+        priority: 'Medium',
+        assignee: isAdmin ? getDefaultAssignee(resourcesRef.current, user.name) : user.name,
+      }));
+      return true;
+    } catch (error) {
+      setTaskError(error.message || 'Unable to create the task in SQLite.');
+      return false;
+    }
+  };
+
+  const handleTaskDialogSubmit = async (event) => {
+    const wasCreated = await addTask(event);
+
+    if (wasCreated) {
+      setIsTaskDialogOpen(false);
+    }
+  };
+
+  const deleteTask = async (taskId) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    const currentTask = tasksRef.current.find((task) => String(task.id) === String(taskId));
+
+    if (!currentTask) {
+      return;
+    }
+
+    if (!window.confirm(`Delete task "${currentTask.title}"?`)) {
+      return;
+    }
+
+    try {
+      const nextTasks = await deleteTaskRecord(taskId);
+      setTasks(nextTasks);
+      setTaskError('');
+      setReportMessage('');
+    } catch (error) {
+      setTaskError(error.message || 'Unable to delete the task.');
+    }
+  };
+
+  const createResource = async (resource) => {
+    if (!isAdmin) {
+      return false;
+    }
+
+    const name = resource.name.trim();
+    const email = resource.email.trim().toLowerCase();
+
+    if (!name || !email) {
+      setTaskError('Resource name and email are required.');
+      return false;
+    }
+
+    if (
+      resourcesRef.current.some(
+        (currentResource) =>
+          currentResource.name.toLowerCase() === name.toLowerCase() ||
+          currentResource.email.toLowerCase() === email.toLowerCase()
+      )
+    ) {
+      setTaskError('Resource name and email must be unique.');
+      return false;
+    }
+
+    try {
+      const createdResource = await createResourceRecord({
+        name,
+        email,
+        role: resource.role === 'Manager' ? 'Manager' : 'Contributor',
+      });
+      const nextResources = [...resourcesRef.current, createdResource].sort((left, right) =>
+        left.name.localeCompare(right.name)
+      );
+      setResources(nextResources);
+      setTaskError('');
+      setReportMessage(
+        createdResource.temporaryPassword
+          ? `Temporary password for ${createdResource.name}: ${createdResource.temporaryPassword}`
+          : ''
+      );
+      setNewTask((current) => ({
+        ...current,
+        assignee: current.assignee || getDefaultAssignee(nextResources, user.name),
+      }));
+      return true;
+    } catch (error) {
+      setTaskError(error.message || 'Unable to create the resource.');
+      return false;
+    }
+  };
+
+  const updateResource = async (resource) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    const existingResource = resourcesRef.current.find(
+      (currentResource) => String(currentResource.id) === String(resource.id)
+    );
+    const name = resource.name.trim();
+    const email = resource.email.trim().toLowerCase();
+
+    if (!existingResource || !name || !email) {
+      setTaskError('Resource name and email are required.');
+      return;
+    }
+
+    if (
+      resourcesRef.current.some(
+        (currentResource) =>
+          String(currentResource.id) !== String(resource.id) &&
+          (currentResource.name.toLowerCase() === name.toLowerCase() ||
+            currentResource.email.toLowerCase() === email.toLowerCase())
+      )
+    ) {
+      setTaskError('Resource name and email must be unique.');
+      return;
+    }
+
+    try {
+      const savedResource = await saveResourceRecord({
+        ...resource,
+        name,
+        email,
+        role: resource.role === 'Manager' ? 'Manager' : 'Contributor',
+      });
+      const nextResources = resourcesRef.current
+        .map((currentResource) =>
+          String(currentResource.id) === String(savedResource.id) ? savedResource : currentResource
+        )
+        .sort((left, right) => left.name.localeCompare(right.name));
+      setResources(nextResources);
+      setTasks((currentTasks) =>
+        existingResource.name === savedResource.name
+          ? currentTasks
+          : currentTasks.map((task) =>
+              task.assignee === existingResource.name
+                ? { ...task, assignee: savedResource.name }
+                : task
+            )
+      );
+      setNewTask((current) => ({
+        ...current,
+        assignee: current.assignee === existingResource.name ? savedResource.name : current.assignee,
+      }));
+      setTaskError('');
+      setReportMessage('');
+    } catch (error) {
+      setTaskError(error.message || 'Unable to save the resource.');
+    }
+  };
+
+  const removeResource = async (resourceId) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    try {
+      const nextResources = await deleteResourceRecord(resourceId);
+      setResources(nextResources);
+      setTaskError('');
+      setNewTask((current) => ({
+        ...current,
+        assignee:
+          current.assignee &&
+          nextResources.some((resource) => resource.name === current.assignee)
+            ? current.assignee
+            : getDefaultAssignee(nextResources, user.name),
+      }));
+    } catch (error) {
+      setTaskError(error.message || 'Unable to delete the resource.');
+    }
+  };
+
+  const totalEffort = accessibleTasks.reduce((sum, task) => sum + task.effort, 0);
+  const productionCount = accessibleTasks.filter((task) => task.status === 'Production').length;
+  const blockedCount = accessibleTasks.filter((task) => task.blocked).length;
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">Employee delivery workspace</p>
+          <h1>Sprint Board</h1>
+          <p className="topbar-copy">
+            Sticky notes can be dragged between stages, and cards stack automatically by
+            priority and due date.
+          </p>
+        </div>
+
+        <div className="user-card">
+          <span className="user-chip">{user.registrationRole || (user.role === 'admin' ? 'Manager' : 'Contributor')}</span>
+          <span className="user-name">{user.name}</span>
+          <div className="topbar-actions">
+            {isAdmin ? (
+              <button
+                type="button"
+                className="ghost-button icon-button"
+                onClick={() => setIsResourceDialogOpen(true)}
+                aria-label="Manage resources"
+                title="Manage resources"
+              >
+                <ResourceIcon />
+              </button>
+            ) : null}
+            <button type="button" className="ghost-button" onClick={logout}>
+              Sign out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {taskError ? <div className="status-banner error-banner">{taskError}</div> : null}
+      {reportMessage ? <div className="status-banner info-banner">{reportMessage}</div> : null}
+      {isLoadingTasks ? (
+        <div className="status-banner info-banner">Loading tasks from SQLite...</div>
+      ) : null}
+
+      <section className="toolbar-card">
+        <div className="toolbar-grid">
+          <div className="toolbar-field">
+            <label htmlFor="search">Search tasks</label>
+            <input
+              id="search"
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search title, squad, or comments"
+            />
+          </div>
+
+          {isAdmin ? (
+            <div className="toolbar-field">
+              <label htmlFor="assignee">Assignee</label>
+              <select
+                id="assignee"
+                value={assigneeFilter}
+                onChange={(event) => setAssigneeFilter(event.target.value)}
+              >
+                <option value="all">All owners</option>
+                {availableAssignees.map((member) => (
+                  <option key={member} value={member}>
+                    {member}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+
+          <div className="toolbar-field">
+            <label htmlFor="stage">Stage</label>
+            <select
+              id="stage"
+              value={stageFilter}
+              onChange={(event) => setStageFilter(event.target.value)}
+              aria-label="Filter by stage"
+              title="Filter by stage"
+            >
+              <option value="all">All stages</option>
+              {STAGES.map((stage) => (
+                <option key={stage} value={stage}>
+                  {stage}
+                </option>
+              ))}
+            </select>
+          </div>
+
+        </div>
+      </section>
+
+      <section className="summary-grid" aria-label="Sprint summary">
+        <article
+          className="summary-card"
+          title="Total tasks available to you in the current workspace."
+        >
+          <p className="eyebrow">Total tasks</p>
+          <strong>{accessibleTasks.length}</strong>
+        </article>
+        <article
+          className="summary-card"
+          title="Total planned effort across all tasks you can access."
+        >
+          <p className="eyebrow">Planned effort</p>
+          <strong>{totalEffort}h</strong>
+        </article>
+        <article
+          className="summary-card"
+          title="Tasks already delivered to production."
+        >
+          <p className="eyebrow">Production ready</p>
+          <strong className="summary-value-green">{productionCount}</strong>
+        </article>
+        <article
+          className="summary-card"
+          title="Blocked tasks currently needing attention."
+        >
+          <p className="eyebrow">Risks</p>
+          <strong className="summary-value-red">{blockedCount}</strong>
+        </article>
+        <button
+          type="button"
+          className="summary-card summary-card-action"
+          onClick={() => setIsTaskDialogOpen(true)}
+          aria-label="Create task"
+          title="Create task"
+        >
+          <p className="eyebrow">Create Task</p>
+          <strong>
+            <PlusIcon />
+          </strong>
+        </button>
       </section>
 
       <section className="board-panel">
         <KanbanBoard
           tasks={accessibleTasks}
           user={user}
-          teamMembers={TEAM_MEMBERS}
+          teamMembers={resources}
           searchTerm={searchTerm}
           assigneeFilter={assigneeFilter}
           stageFilter={stageFilter}
@@ -665,8 +1448,32 @@ function Dashboard() {
           onCommentDraftChange={updateCommentDraft}
           onCommentAdd={addComment}
           onCommentUpdate={updateComment}
+          onTaskDelete={deleteTask}
         />
       </section>
+
+      {isAdmin && isResourceDialogOpen ? (
+        <ResourceManager
+          resources={resources}
+          tasks={tasks}
+          onCreateResource={createResource}
+          onSaveResource={updateResource}
+          onDeleteResource={removeResource}
+          onClose={() => setIsResourceDialogOpen(false)}
+        />
+      ) : null}
+
+      {isTaskDialogOpen ? (
+        <TaskComposerDialog
+          isAdmin={isAdmin}
+          resources={resources}
+          user={user}
+          newTask={newTask}
+          setNewTask={setNewTask}
+          onSubmit={handleTaskDialogSubmit}
+          onClose={() => setIsTaskDialogOpen(false)}
+        />
+      ) : null}
     </main>
   );
 }
@@ -676,6 +1483,10 @@ function AppShell() {
 
   if (!user) {
     return <LoginScreen />;
+  }
+
+  if (user.mustChangePassword) {
+    return <PasswordChangeScreen />;
   }
 
   return <Dashboard />;

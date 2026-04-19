@@ -14,6 +14,7 @@ export default function KanbanBoard({
   onCommentDraftChange,
   onCommentAdd,
   onCommentUpdate,
+  onTaskDelete,
 }) {
   const [activeTaskIds, setActiveTaskIds] = useState({});
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
@@ -120,6 +121,7 @@ export default function KanbanBoard({
                     onCommentDraftChange={onCommentDraftChange}
                     onCommentAdd={onCommentAdd}
                     onCommentUpdate={onCommentUpdate}
+                    onDelete={onTaskDelete}
                     onDragStart={(event) => {
                       event.dataTransfer.setData('text/plain', task.id);
                       event.dataTransfer.effectAllowed = 'move';

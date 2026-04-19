@@ -1,10 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { INITIAL_RESOURCES } from '../data/seedData';
+import { changePassword, loginWithPassword } from '../services/taskApi';
 
 const USER_STORAGE_KEY = 'sprint-manager-user';
+const RESOURCE_STORAGE_KEY = 'sprint-manager-resources';
 const AUTH_STATE_KEY = 'sprint-manager-oracle-auth-state';
 const PKCE_VERIFIER_KEY = 'sprint-manager-oracle-pkce-verifier';
 const PKCE_NONCE_KEY = 'sprint-manager-oracle-pkce-nonce';
 const CALLBACK_IN_FLIGHT_KEY = 'sprint-manager-oracle-callback-in-flight';
+const ORACLE_SSO_DISABLED = true;
 
 const AuthContext = createContext(null);
 
@@ -19,20 +23,122 @@ function parseEnvList(value) {
     .filter(Boolean);
 }
 
+function writeCachedResources(resources) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(RESOURCE_STORAGE_KEY, JSON.stringify(resources));
+}
+
+function normalizeIdentity(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function normalizeRegisteredResource(resource) {
+  if (!resource || typeof resource !== 'object') {
+    return null;
+  }
+
+  const name = String(resource.name || '').trim();
+  const email = normalizeIdentity(resource.email);
+  const role = String(resource.role || 'Contributor').trim() === 'Manager' ? 'Manager' : 'Contributor';
+  const requiresPasswordChange = Boolean(
+    resource.requiresPasswordChange ?? resource.require_password_change ?? true
+  );
+
+  if (!name || !email) {
+    return null;
+  }
+
+  return {
+    ...resource,
+    name,
+    email,
+    role,
+    requiresPasswordChange,
+  };
+}
+
+async function fetchRegisteredResources() {
+  if (process.env.NODE_ENV === 'test') {
+    const resources = INITIAL_RESOURCES.map(normalizeRegisteredResource).filter(Boolean);
+    writeCachedResources(resources);
+    return resources;
+  }
+
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const apiBaseUrl =
+    normalizeBaseUrl(process.env.REACT_APP_API_BASE_URL) ||
+    (window.location.port === '3000' ? 'http://localhost:4000' : '');
+
+  const response = await fetch(`${apiBaseUrl}/api/resources`);
+
+  if (!response.ok) {
+    throw new Error('Unable to load registered resources.');
+  }
+
+  const payload = await response.json().catch(() => ({}));
+  const resources = (Array.isArray(payload.resources) ? payload.resources : [])
+    .map(normalizeRegisteredResource)
+    .filter(Boolean);
+
+  if (resources.length) {
+    writeCachedResources(resources);
+  }
+
+  return resources;
+}
+
+async function findRegisteredResourceByEmail(email) {
+  const normalizedEmail = normalizeIdentity(email);
+
+  if (!normalizedEmail) {
+    return null;
+  }
+
+  const resources = await fetchRegisteredResources();
+
+  return (
+    resources.find((resource) => resource.email === normalizedEmail) || null
+  );
+}
+
 function getOracleConfig() {
   const domainUrl = normalizeBaseUrl(process.env.REACT_APP_ORACLE_DOMAIN_URL);
   const clientId = (process.env.REACT_APP_ORACLE_CLIENT_ID || '').trim();
   const redirectUri =
     (process.env.REACT_APP_ORACLE_REDIRECT_URI || '').trim() ||
     (typeof window !== 'undefined' ? window.location.origin : '');
+  const allowedEmailDomains = parseEnvList(process.env.REACT_APP_ORACLE_ALLOWED_EMAIL_DOMAINS);
+  const missingFields = [];
+
+  if (!domainUrl) {
+    missingFields.push('REACT_APP_ORACLE_DOMAIN_URL');
+  }
+
+  if (!clientId) {
+    missingFields.push('REACT_APP_ORACLE_CLIENT_ID');
+  }
+
+  if (!redirectUri) {
+    missingFields.push('REACT_APP_ORACLE_REDIRECT_URI');
+  }
+
+  if (!allowedEmailDomains.length) {
+    missingFields.push('REACT_APP_ORACLE_ALLOWED_EMAIL_DOMAINS');
+  }
 
   return {
     domainUrl,
     clientId,
     redirectUri,
     scope: (process.env.REACT_APP_ORACLE_SCOPE || 'openid profile email').trim(),
-    allowedEmailDomains: parseEnvList(process.env.REACT_APP_ORACLE_ALLOWED_EMAIL_DOMAINS),
-    adminEmails: parseEnvList(process.env.REACT_APP_SPRINT_MANAGER_ADMIN_EMAILS),
+    allowedEmailDomains,
+    missingFields,
   };
 }
 
@@ -129,11 +235,13 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState('');
 
   const oracleConfig = useMemo(() => getOracleConfig(), []);
-  const isOracleConfigured = Boolean(oracleConfig.domainUrl && oracleConfig.clientId);
-  const canUseDemoLogin =
-    process.env.NODE_ENV !== 'production' ||
-    process.env.REACT_APP_ALLOW_DEMO_LOGIN === 'true' ||
-    !isOracleConfigured;
+  const isOracleConfigured = !ORACLE_SSO_DISABLED && oracleConfig.missingFields.length === 0;
+  const oracleConfigError = isOracleConfigured
+    ? ''
+    : ORACLE_SSO_DISABLED
+      ? 'Oracle SSO is temporarily disabled.'
+      : `Oracle SSO is not fully configured. Missing: ${oracleConfig.missingFields.join(', ')}`;
+  const canUseDemoLogin = process.env.REACT_APP_ALLOW_DEMO_LOGIN !== 'false';
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -149,7 +257,36 @@ export function AuthProvider({ children }) {
   }, [user]);
 
   useEffect(() => {
-    if (!isOracleConfigured || typeof window === 'undefined') {
+    if (process.env.NODE_ENV === 'test' || !user?.email) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const validateStoredUser = async () => {
+      try {
+        const registeredResource = await findRegisteredResourceByEmail(user.email);
+
+        if (!registeredResource && !isCancelled) {
+          setUser(null);
+          setAuthError('Your resource email is no longer registered for Sprint Board access.');
+        }
+      } catch {
+        if (!isCancelled) {
+          setAuthError('Unable to verify your resource access from the Sprint Board API.');
+        }
+      }
+    };
+
+    void validateStoredUser();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.email]);
+
+  useEffect(() => {
+    if (ORACLE_SSO_DISABLED || !isOracleConfigured || typeof window === 'undefined') {
       return;
     }
 
@@ -229,10 +366,18 @@ export function AuthProvider({ children }) {
           throw new Error('Only employees can access this workspace.');
         }
 
+        const registeredResource = await findRegisteredResourceByEmail(email);
+
+        if (!registeredResource) {
+          throw new Error('Only admin-registered resource emails can access this workspace.');
+        }
+
         setUser({
-          name: profile.name || profile.preferred_username || email,
-          email,
-          role: oracleConfig.adminEmails.includes(email.toLowerCase()) ? 'admin' : 'user',
+          name: registeredResource.name,
+          email: registeredResource.email,
+          role: registeredResource.role === 'Manager' ? 'admin' : 'user',
+          registrationRole: registeredResource.role,
+          mustChangePassword: false,
           authProvider: 'oracle',
         });
         setAuthStatus('idle');
@@ -250,6 +395,11 @@ export function AuthProvider({ children }) {
   }, [isOracleConfigured, oracleConfig]);
 
   const startOracleLogin = async () => {
+    if (ORACLE_SSO_DISABLED) {
+      setAuthError('Oracle SSO is temporarily disabled.');
+      return;
+    }
+
     if (!isOracleConfigured || typeof window === 'undefined') {
       setAuthError('Oracle SSO is not configured. Add the Oracle environment variables first.');
       return;
@@ -279,21 +429,37 @@ export function AuthProvider({ children }) {
     window.location.assign(authorizeUrl.toString());
   };
 
-  const loginDemo = ({ name, role }) => {
+  const loginDemo = async ({ email, password }) => {
     if (!canUseDemoLogin) {
       setAuthError('Demo login is disabled for this environment.');
       return;
     }
 
-    const trimmedName = name.trim();
+    try {
+      const payload = await loginWithPassword(email, password);
+      setUser(payload.user);
+      setAuthError('');
+    } catch (error) {
+      if (error.message === 'Unable to reach the Sprint Board API.') {
+        setAuthError(
+          'Unable to reach the Sprint Board API. Start the app with "npm start" so the UI and SQLite API run together, or start "npm run server" separately.'
+        );
+        return;
+      }
 
-    setUser({
-      name: trimmedName || 'Team Member',
-      email: `${(trimmedName || 'team.member').toLowerCase().replace(/\s+/g, '.')}@example.com`,
-      role: role === 'admin' ? 'admin' : 'user',
-      authProvider: 'demo',
-    });
+      setAuthError(error.message || 'Unable to sign in with email and password.');
+    }
+  };
+
+  const updatePassword = async ({ currentPassword, newPassword }) => {
+    if (!user?.email) {
+      throw new Error('You need to sign in before updating the password.');
+    }
+
+    const payload = await changePassword(user.email, currentPassword, newPassword);
+    setUser(payload.user);
     setAuthError('');
+    return payload.user;
   };
 
   const logout = () => {
@@ -311,9 +477,11 @@ export function AuthProvider({ children }) {
         authStatus,
         authError,
         isOracleConfigured,
+        oracleConfigError,
         canUseDemoLogin,
         startOracleLogin,
         loginDemo,
+        updatePassword,
         logout,
       }}
     >

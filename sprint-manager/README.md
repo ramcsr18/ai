@@ -1,8 +1,8 @@
 # Sprint Board
 
 Sprint Board is a React delivery board for teams that need a simple sprint cockpit with
-sticky-note workflow tracking, inline task editing, Oracle SSO-ready authentication,
-and SQLite-backed persistence.
+sticky-note workflow tracking, inline task editing, Oracle SSO authentication, and
+SQLite-backed persistence.
 
 ## Highlights
 
@@ -23,7 +23,9 @@ The backend is a lightweight Node HTTP server that exposes:
 - `GET /api/tasks`
 - `POST /api/tasks`
 - `PUT /api/tasks/:id`
+- `DELETE /api/tasks/:id`
 - `POST /api/tasks/reset`
+- `POST /api/reports/open-tasks`
 
 ## Oracle SSO configuration
 
@@ -34,13 +36,40 @@ Create a `.env` file from `.env.example` and provide:
 - `REACT_APP_ORACLE_REDIRECT_URI`
 - `REACT_APP_ORACLE_ALLOWED_EMAIL_DOMAINS`
 - `REACT_APP_SPRINT_MANAGER_ADMIN_EMAILS`
+- Optional temporary fallback control: `REACT_APP_ALLOW_DEMO_LOGIN=true|false`
 
 This app starts an Oracle OAuth 2.0 / OpenID Connect authorization code flow with PKCE
 for browser-based login and calls the standard Oracle identity domain authorize, token,
 and user info endpoints.
 
-If Oracle SSO is not configured, a demo login remains available outside production so the
-board can still be developed locally.
+Oracle SSO is considered active only when the Oracle domain URL, client ID, redirect URI,
+and employee email domain allowlist are configured. Non-Oracle sign-in is temporarily enabled
+by default and can be turned off explicitly with `REACT_APP_ALLOW_DEMO_LOGIN=false`.
+
+## Email reports
+
+Sprint Board can generate and send email reports for open tasks:
+
+- Logged-in users can request an open-tasks report from the UI.
+- Admin requests are grouped by owner.
+- The backend can send daily emails to each resource for blocked, high-priority, and overdue
+  tasks, with admins CC'd.
+
+Configure SMTP in the server environment to enable actual delivery:
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_STARTTLS`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `SMTP_FROM`
+- `SPRINT_MANAGER_ADMIN_EMAILS`
+- Optional schedule controls: `SPRINT_BOARD_DAILY_REPORT_HOUR` and
+  `SPRINT_BOARD_DAILY_REPORT_MINUTE`
+
+If SMTP is not configured, report generation still works, but the app will only generate the
+report payload and will not deliver email.
 
 ## Available scripts
 
@@ -62,9 +91,89 @@ Runs the test suite with React Testing Library.
 
 Creates a production build in the `build` directory.
 
+### `npm run package:prod`
+
+Builds the frontend and creates a deployable tarball at
+`.deploy/sprint-board-production.tar.gz`.
+
+The bundle includes:
+
+- `build/` with the compiled React app
+- `server/` with the Node + SQLite backend
+- `.env.production.example`
+- `DEPLOYMENT.md` with a short startup guide
+
 ### `npm run start:prod`
 
 Starts the Node server, which serves the built frontend and the SQLite API together.
+
+## Production deployment
+
+Sprint Board can be deployed in two simple ways.
+
+### Option 1: Node bundle deployment
+
+Build the production package:
+
+```bash
+npm run package:prod
+```
+
+Extract the generated archive on the target host:
+
+```bash
+tar -xzf sprint-board-production.tar.gz
+cd sprint-board
+cp .env.production.example .env
+```
+
+Update `.env` with your production values, then start the app:
+
+```bash
+PORT=4000 node server/index.js
+```
+
+Notes:
+
+- Use Node.js 22 or newer because the backend uses the built-in `node:sqlite` module.
+- The UI and API are served from the same Node process on the same port.
+- SQLite data is stored at `server/data/sprint-board.sqlite`.
+- Set `REACT_APP_ALLOW_DEMO_LOGIN=false` in production.
+- Build with the final production URL in `REACT_APP_ORACLE_REDIRECT_URI`.
+
+### Option 2: Docker deployment
+
+Build the container image:
+
+```bash
+docker build -t sprint-board:latest .
+```
+
+Run it with a persistent SQLite data directory and environment file:
+
+```bash
+docker run -d \
+  --name sprint-board \
+  -p 4000:4000 \
+  --env-file .env \
+  -v "$(pwd)/server-data:/app/server/data" \
+  sprint-board:latest
+```
+
+Notes:
+
+- The container serves the compiled UI and API on port `4000`.
+- Mount `/app/server/data` so the SQLite database survives container restarts.
+- Rebuild the image whenever you change React env vars such as Oracle SSO settings, because
+  `REACT_APP_*` values are compiled into the frontend build.
+
+### Recommended production checklist
+
+- Set `REACT_APP_ALLOW_DEMO_LOGIN=false`.
+- Configure Oracle SSO redirect URIs for the final HTTPS host.
+- Configure `SPRINT_MANAGER_ADMIN_EMAILS` and `REACT_APP_SPRINT_MANAGER_ADMIN_EMAILS`.
+- Configure SMTP values if you want report emails to be delivered.
+- Back up `server/data/sprint-board.sqlite` regularly.
 
 ### `npm run import:confluence -- <csv-file> [--replace]`
 

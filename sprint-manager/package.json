@@ -13,10 +13,13 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node scripts/start-dev.js",
+    "start:client": "react-scripts start",
     "server": "node server/index.js",
     "start:prod": "node server/index.js",
     "build": "react-scripts build",
+    "migrate:sqlite": "node scripts/migrate-sqlite.js",
+    "package:prod": "bash scripts/package-production.sh",
     "test": "react-scripts test",
     "import:confluence": "node scripts/import-confluence-csv.js",
     "import:confluence:json": "node scripts/import-confluence-json.js",

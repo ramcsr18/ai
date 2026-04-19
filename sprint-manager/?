@@ -1,0 +1,16 @@
+src/App.js:333:        role="dialog"
+src/App.js:560:  const isAdmin = user.role === 'admin';
+src/App.js:987:          <span className="user-chip">{user.role === 'admin' ? 'Admin' : 'Contributor'}</span>
+src/context/AuthContext.js:380:          role: oracleConfig.adminEmails.includes(email.toLowerCase()) ? 'admin' : 'user',
+src/context/AuthContext.js:450:      role: oracleConfig.adminEmails.includes(registeredResource.email) ? 'admin' : 'user',
+src/App.test.js:84:      role: 'admin',
+src/App.test.js:152:      role: 'admin',
+src/App.test.js:246:      role: 'admin',
+src/App.test.js:315:      role: 'admin',
+src/App.test.js:347:      role: 'admin',
+src/App.test.js:433:      role: 'admin',
+src/App.test.js:474:      role: 'admin',
+src/App.test.js:532:      role: 'admin',
+src/App.test.js:590:      role: 'user',
+src/App.test.js:664:      role: 'admin',
+src/App.test.js:721:      role: 'admin',

@@ -4,6 +4,7 @@ import {
   formatCommentDate,
   formatFullDate,
   getDateInputValue,
+  isTaskOverdue,
   getTaskTitleTone,
 } from '../utils/taskUtils';
 
@@ -28,6 +29,8 @@ const statusHeaderColors = {
   Production: 'linear-gradient(135deg, #e7fbe9, #79be86)',
   Completed: 'linear-gradient(135deg, #eef6ff, #8db1e6)',
 };
+const alertHeaderGradient = 'linear-gradient(135deg, #ffd7d7, #b42318)';
+const unassignedIngestionGradient = 'linear-gradient(135deg, #e2e8f0, #64748b)';
 
 const priorityOptions = ['High', 'Medium', 'Low'];
 const DEFAULT_VISIBLE_COMMENTS = 3;
@@ -123,6 +126,32 @@ function ChevronIcon({ expanded }) {
   );
 }
 
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M5.8 6.5h8.4l-.6 9a1.2 1.2 0 0 1-1.2 1.1H7.6a1.2 1.2 0 0 1-1.2-1.1l-.6-9Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M4.8 5.2h10.4M7.6 5.2V3.8h4.8v1.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function StickyNote({
   task,
   isActive,
@@ -134,6 +163,7 @@ export default function StickyNote({
   onCommentDraftChange,
   onCommentAdd,
   onCommentUpdate,
+  onDelete,
   onDragStart,
   onActivate,
   canEdit,
@@ -209,6 +239,24 @@ export default function StickyNote({
   const recentComments = sortedComments.slice(0, DEFAULT_VISIBLE_COMMENTS);
   const historyComments = sortedComments.slice(DEFAULT_VISIBLE_COMMENTS);
   const hiddenCommentCount = historyComments.length;
+  const ownerOptions = useMemo(() => {
+    const normalizedMembers = Array.isArray(teamMembers) ? teamMembers : [];
+    const options = normalizedMembers.map((member) => ({
+      key: member.id || member.name || member.email,
+      value: member.name || '',
+      label: member.email || '',
+    }));
+
+    if (task.assignee && !options.some((option) => option.value === task.assignee)) {
+      options.unshift({
+        key: `current-${task.assignee}`,
+        value: task.assignee,
+        label: '',
+      });
+    }
+
+    return options.filter((option) => option.value);
+  }, [task.assignee, teamMembers]);
 
   const submitComment = () => {
     const trimmedDraft = task.draftComment.trim();
@@ -290,6 +338,12 @@ export default function StickyNote({
   const canEditOwner = canEdit && isAdmin;
   const canEditComments = canEdit && isAdmin;
   const titleToneClass = getTaskTitleTone(task);
+  const isUnassignedIngestion = isAdmin && task.status === 'Ingestion' && !String(task.assignee || '').trim();
+  const headerBackground = task.blocked || isTaskOverdue(task)
+    ? alertHeaderGradient
+    : isUnassignedIngestion
+      ? unassignedIngestionGradient
+    : statusHeaderColors[task.status];
 
   const renderComment = (comment, isHistory = false) => {
     const isEditingComment = editingCommentId === comment.id;
@@ -351,7 +405,7 @@ export default function StickyNote({
       >
         <div
           className="note-panel-meta note-panel-meta-decorated"
-          style={{ background: statusHeaderColors[task.status] }}
+          style={{ background: headerBackground }}
         >
           <div className="note-panel-meta-left">
             {isEditingArea ? (
@@ -421,27 +475,42 @@ export default function StickyNote({
                       title="Owner"
                     />
                     <datalist id={`task-owner-options-${task.id}`}>
-                      {teamMembers.map((member) => (
-                        <option key={member} value={member} />
+                      {ownerOptions.map((member) => (
+                        <option
+                          key={member.key}
+                          value={member.value}
+                          label={member.label}
+                        />
                       ))}
                     </datalist>
                   </>
                 </label>
               ) : (
-                <button
-                  type="button"
-                  className="header-editable note-owner note-owner-button"
-                  onDoubleClick={() => {
-                    if (canEditOwner) {
-                      setIsEditingOwner(true);
-                    }
-                  }}
-                  disabled={!canEditOwner}
-                  title={canEditOwner ? 'Double-click to edit owner' : 'Owner'}
-                >
-                  <OwnerIcon />
-                  <span>{task.assignee}</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="header-editable note-owner note-owner-button"
+                    onDoubleClick={() => {
+                      if (canEditOwner) {
+                        setIsEditingOwner(true);
+                      }
+                    }}
+                    disabled={!canEditOwner}
+                    title={canEditOwner ? 'Double-click to edit owner' : 'Owner'}
+                  >
+                    <OwnerIcon />
+                    <span>{task.assignee || 'Unassigned'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost-button icon-button task-delete-button"
+                    onClick={() => onDelete?.(task.id)}
+                    aria-label={`Delete ${task.title}`}
+                    title="Delete task"
+                  >
+                    <TrashIcon />
+                  </button>
+                </>
               )}
             </div>
           ) : null}
@@ -449,19 +518,20 @@ export default function StickyNote({
         <div className="note-title-band">
           <div className="note-title-content">
             {isEditingTitle ? (
-              <input
+              <textarea
                 id={`task-title-${task.id}`}
                 className="header-edit-input header-edit-input-title"
-                type="text"
                 value={draftTitle}
                 onChange={(event) => setDraftTitle(event.target.value)}
                 onBlur={submitTitle}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
+                  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                    event.preventDefault();
                     submitTitle();
                   }
 
                   if (event.key === 'Escape') {
+                    event.preventDefault();
                     setDraftTitle(task.title);
                     setIsEditingTitle(false);
                   }
@@ -469,6 +539,7 @@ export default function StickyNote({
                 autoFocus
                 aria-label={`Title for ${task.title}`}
                 title="Task title"
+                rows={4}
               />
             ) : (
               <button

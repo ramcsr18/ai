@@ -9,6 +9,45 @@ const STAGES = [
   'Completed',
 ];
 
+const INITIAL_RESOURCES = [
+  {
+    id: 1,
+    name: 'Avery Chen',
+    email: 'avery.chen@example.com',
+    role: 'Contributor',
+  },
+  {
+    id: 2,
+    name: 'Priya Nair',
+    email: 'priya.nair@example.com',
+    role: 'Contributor',
+  },
+  {
+    id: 3,
+    name: 'Mateo Silva',
+    email: 'mateo.silva@example.com',
+    role: 'Contributor',
+  },
+  {
+    id: 4,
+    name: 'Jordan Lee',
+    email: 'jordan.lee@example.com',
+    role: 'Contributor',
+  },
+  {
+    id: 5,
+    name: 'Nina Patel',
+    email: 'nina.patel@example.com',
+    role: 'Contributor',
+  },
+  {
+    id: 6,
+    name: 'Ram Mohan Yaratapally',
+    email: 'ram.mohan.yaratapally@oracle.com',
+    role: 'Manager',
+  },
+];
+
 const INITIAL_TASKS = [
   {
     id: 101,
@@ -189,6 +228,7 @@ const INITIAL_TASKS = [
 ];
 
 module.exports = {
+  INITIAL_RESOURCES,
   INITIAL_TASKS,
   STAGES,
 };

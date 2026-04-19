@@ -14,7 +14,6 @@
 .login-card,
 .summary-card,
 .toolbar-card,
-.composer-card,
 .kanban-column {
   border: 1px solid rgba(34, 62, 54, 0.08);
   border-radius: 24px;
@@ -25,8 +24,7 @@
 
 .hero-card,
 .login-card,
-.toolbar-card,
-.composer-card {
+.toolbar-card {
   padding: 28px;
 }
 
@@ -76,6 +74,23 @@
   border-top: 1px solid rgba(20, 52, 43, 0.1);
 }
 
+.password-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.password-input-row input {
+  min-width: 0;
+}
+
+.password-visibility-toggle {
+  align-self: stretch;
+  min-width: 44px;
+  padding: 10px 12px;
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -94,6 +109,13 @@
   border-radius: 18px;
   background: rgba(255, 252, 245, 0.72);
   border: 1px solid rgba(34, 62, 54, 0.08);
+}
+
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }
 
 .user-name {
@@ -120,7 +142,7 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 18px;
 }
@@ -135,6 +157,44 @@
   font-size: clamp(2rem, 4vw, 2.8rem);
 }
 
+.summary-card-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease;
+}
+
+.summary-card-action strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 12px 0 4px;
+  border-radius: 18px;
+  background: rgba(20, 52, 43, 0.1);
+  color: #14342b;
+  font-size: 0;
+}
+
+.summary-card-action strong svg {
+  width: 28px;
+  height: 28px;
+}
+
+.summary-card-action:hover,
+.summary-card-action:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(20, 52, 43, 0.18);
+  box-shadow: 0 20px 44px rgba(61, 52, 38, 0.14);
+}
+
 .summary-value-green {
   color: #1f7a57;
 }
@@ -143,8 +203,7 @@
   color: #b33a2f;
 }
 
-.toolbar-card,
-.composer-card {
+.toolbar-card {
   margin-bottom: 18px;
 }
 
@@ -160,14 +219,157 @@
   gap: 12px 14px;
 }
 
-.toolbar-field,
-.toolbar-actions {
-  display: grid;
-  gap: 8px;
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 8px;
 }
 
-.toolbar-actions {
-  justify-items: start;
+.icon-button svg {
+  display: block;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 20px 20px;
+  background: rgba(23, 31, 28, 0.28);
+  backdrop-filter: blur(8px);
+}
+
+.resources-dialog {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 68px);
+  overflow: auto;
+  padding: 18px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(34, 62, 54, 0.08);
+  background: rgba(255, 252, 245, 0.96);
+  box-shadow: 0 22px 56px rgba(44, 37, 29, 0.18);
+}
+
+.task-compose-dialog {
+  width: min(880px, 100%);
+}
+
+.resources-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.task-dialog-copy {
+  margin: 0 0 18px;
+}
+
+.resource-add-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) 140px auto;
+  gap: 8px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.resource-list {
+  display: grid;
+  gap: 6px;
+}
+
+.resource-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(20, 52, 43, 0.08);
+}
+
+.resource-row-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) 140px;
+  gap: 6px;
+}
+
+.resource-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.resource-row input,
+.resource-add-form input {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 10px;
+}
+
+.resource-row select,
+.resource-add-form select {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 10px;
+}
+
+.resource-add-button {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+}
+
+.resource-add-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.task-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+
+.create-task-trigger {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 10px;
+}
+
+.resource-task-count {
+  min-width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #14342b;
+  background: rgba(20, 52, 43, 0.1);
+}
+
+.task-delete-button {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 6px;
+}
+
+.toolbar-field {
+  display: grid;
+  gap: 8px;
 }
 
 .composer-header {
@@ -395,6 +597,13 @@
   line-height: 1.2;
   color: #20302a;
   letter-spacing: -0.01em;
+  min-height: calc(1.12rem * 1.2 * 4);
+  max-height: calc(1.12rem * 1.2 * 4);
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: normal;
+  word-break: break-word;
+  padding-right: 4px;
 }
 
 .title-overdue {
@@ -491,6 +700,13 @@
 .header-edit-input-title {
   font-size: 1rem;
   font-weight: 700;
+  min-height: calc(1rem * 1.25 * 4 + 12px);
+  max-height: calc(1rem * 1.25 * 4 + 12px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  resize: none;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .tag {
@@ -816,7 +1032,8 @@ textarea {
   }
 
   .toolbar-grid,
-  .task-form-wide {
+  .task-form-wide,
+  .resource-add-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -854,13 +1071,33 @@ textarea {
   .summary-grid,
   .toolbar-grid,
   .task-form-wide,
-  .task-edit-grid {
+  .task-edit-grid,
+  .resource-add-form,
+  .resource-row-fields {
     grid-template-columns: 1fr;
+  }
+
+  .resource-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-backdrop {
+    padding-top: 24px;
+  }
+
+  .resources-dialog {
+    padding: 18px;
   }
 
   .user-card {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
   }
 
   .kanban-cards {

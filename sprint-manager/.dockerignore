@@ -1,0 +1,10 @@
+node_modules
+build
+.deploy
+.git
+.gitignore
+npm-debug.log*
+coverage
+server/data/*.sqlite
+server/data/*.sqlite-*
+
