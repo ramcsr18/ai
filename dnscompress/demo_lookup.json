@@ -1,0 +1,362 @@
+[
+  {
+    "symbol": 4,
+    "left": 1,
+    "right": 2,
+    "motif": "CG"
+  },
+  {
+    "symbol": 5,
+    "left": 1,
+    "right": 3,
+    "motif": "CT"
+  },
+  {
+    "symbol": 6,
+    "left": 0,
+    "right": 2,
+    "motif": "AG"
+  },
+  {
+    "symbol": 7,
+    "left": 0,
+    "right": 4,
+    "motif": "ACG"
+  },
+  {
+    "symbol": 8,
+    "left": 1,
+    "right": 1,
+    "motif": "CC"
+  },
+  {
+    "symbol": 9,
+    "left": 6,
+    "right": 0,
+    "motif": "AGA"
+  },
+  {
+    "symbol": 10,
+    "left": 4,
+    "right": 3,
+    "motif": "CGT"
+  },
+  {
+    "symbol": 11,
+    "left": 0,
+    "right": 3,
+    "motif": "AT"
+  },
+  {
+    "symbol": 12,
+    "left": 0,
+    "right": 5,
+    "motif": "ACT"
+  },
+  {
+    "symbol": 13,
+    "left": 2,
+    "right": 1,
+    "motif": "GC"
+  },
+  {
+    "symbol": 14,
+    "left": 9,
+    "right": 7,
+    "motif": "AGAACG"
+  },
+  {
+    "symbol": 15,
+    "left": 1,
+    "right": 7,
+    "motif": "CACG"
+  },
+  {
+    "symbol": 16,
+    "left": 0,
+    "right": 1,
+    "motif": "AC"
+  },
+  {
+    "symbol": 17,
+    "left": 9,
+    "right": 12,
+    "motif": "AGAACT"
+  },
+  {
+    "symbol": 18,
+    "left": 5,
+    "right": 11,
+    "motif": "CTAT"
+  },
+  {
+    "symbol": 19,
+    "left": 4,
+    "right": 8,
+    "motif": "CGCC"
+  },
+  {
+    "symbol": 20,
+    "left": 0,
+    "right": 6,
+    "motif": "AAG"
+  },
+  {
+    "symbol": 21,
+    "left": 10,
+    "right": 3,
+    "motif": "CGTT"
+  },
+  {
+    "symbol": 22,
+    "left": 10,
+    "right": 2,
+    "motif": "CGTG"
+  },
+  {
+    "symbol": 23,
+    "left": 7,
+    "right": 8,
+    "motif": "ACGCC"
+  },
+  {
+    "symbol": 24,
+    "left": 5,
+    "right": 6,
+    "motif": "CTAG"
+  },
+  {
+    "symbol": 25,
+    "left": 20,
+    "right": 2,
+    "motif": "AAGG"
+  },
+  {
+    "symbol": 26,
+    "left": 5,
+    "right": 1,
+    "motif": "CTC"
+  },
+  {
+    "symbol": 27,
+    "left": 5,
+    "right": 15,
+    "motif": "CTCACG"
+  },
+  {
+    "symbol": 28,
+    "left": 4,
+    "right": 13,
+    "motif": "CGGC"
+  },
+  {
+    "symbol": 29,
+    "left": 5,
+    "right": 0,
+    "motif": "CTA"
+  },
+  {
+    "symbol": 30,
+    "left": 6,
+    "right": 3,
+    "motif": "AGT"
+  },
+  {
+    "symbol": 31,
+    "left": 4,
+    "right": 11,
+    "motif": "CGAT"
+  },
+  {
+    "symbol": 32,
+    "left": 10,
+    "right": 1,
+    "motif": "CGTC"
+  },
+  {
+    "symbol": 33,
+    "left": 3,
+    "right": 3,
+    "motif": "TT"
+  },
+  {
+    "symbol": 34,
+    "left": 4,
+    "right": 2,
+    "motif": "CGG"
+  },
+  {
+    "symbol": 35,
+    "left": 4,
+    "right": 16,
+    "motif": "CGAC"
+  },
+  {
+    "symbol": 36,
+    "left": 0,
+    "right": 14,
+    "motif": "AAGAACG"
+  },
+  {
+    "symbol": 37,
+    "left": 5,
+    "right": 8,
+    "motif": "CTCC"
+  },
+  {
+    "symbol": 38,
+    "left": 0,
+    "right": 17,
+    "motif": "AAGAACT"
+  },
+  {
+    "symbol": 39,
+    "left": 6,
+    "right": 19,
+    "motif": "AGCGCC"
+  },
+  {
+    "symbol": 40,
+    "left": 0,
+    "right": 7,
+    "motif": "AACG"
+  },
+  {
+    "symbol": 41,
+    "left": 15,
+    "right": 8,
+    "motif": "CACGCC"
+  },
+  {
+    "symbol": 42,
+    "left": 4,
+    "right": 1,
+    "motif": "CGC"
+  },
+  {
+    "symbol": 43,
+    "left": 20,
+    "right": 3,
+    "motif": "AAGT"
+  },
+  {
+    "symbol": 44,
+    "left": 26,
+    "right": 12,
+    "motif": "CTCACT"
+  },
+  {
+    "symbol": 45,
+    "left": 15,
+    "right": 2,
+    "motif": "CACGG"
+  },
+  {
+    "symbol": 46,
+    "left": 23,
+    "right": 14,
+    "motif": "ACGCCAGAACG"
+  },
+  {
+    "symbol": 47,
+    "left": 4,
+    "right": 6,
+    "motif": "CGAG"
+  },
+  {
+    "symbol": 48,
+    "left": 7,
+    "right": 13,
+    "motif": "ACGGC"
+  },
+  {
+    "symbol": 49,
+    "left": 29,
+    "right": 12,
+    "motif": "CTAACT"
+  },
+  {
+    "symbol": 50,
+    "left": 14,
+    "right": 16,
+    "motif": "AGAACGAC"
+  },
+  {
+    "symbol": 51,
+    "left": 30,
+    "right": 1,
+    "motif": "AGTC"
+  },
+  {
+    "symbol": 52,
+    "left": 2,
+    "right": 2,
+    "motif": "GG"
+  },
+  {
+    "symbol": 53,
+    "left": 21,
+    "right": 32,
+    "motif": "CGTTCGTC"
+  },
+  {
+    "symbol": 54,
+    "left": 21,
+    "right": 22,
+    "motif": "CGTTCGTG"
+  },
+  {
+    "symbol": 55,
+    "left": 30,
+    "right": 2,
+    "motif": "AGTG"
+  },
+  {
+    "symbol": 56,
+    "left": 17,
+    "right": 11,
+    "motif": "AGAACTAT"
+  },
+  {
+    "symbol": 57,
+    "left": 25,
+    "right": 25,
+    "motif": "AAGGAAGG"
+  },
+  {
+    "symbol": 58,
+    "left": 45,
+    "right": 46,
+    "motif": "CACGGACGCCAGAACG"
+  },
+  {
+    "symbol": 59,
+    "left": 27,
+    "right": 13,
+    "motif": "CTCACGGC"
+  },
+  {
+    "symbol": 60,
+    "left": 10,
+    "right": 23,
+    "motif": "CGTACGCC"
+  },
+  {
+    "symbol": 61,
+    "left": 19,
+    "right": 22,
+    "motif": "CGCCCGTG"
+  },
+  {
+    "symbol": 62,
+    "left": 10,
+    "right": 48,
+    "motif": "CGTACGGC"
+  },
+  {
+    "symbol": 63,
+    "left": 39,
+    "right": 18,
+    "motif": "AGCGCCCTAT"
+  }
+]
