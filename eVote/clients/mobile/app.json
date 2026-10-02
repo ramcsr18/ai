@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "eVote Civic",
+    "slug": "evote-civic",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#103f40" },
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#103f40" } }
+  }
+}

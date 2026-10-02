@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "e7f9c50c-2767-40a1-885e-63d6a75cfd53"
+      }
+    },
+    "owner": "nsrtech",
+    "slug": "evote"
+  }
+}

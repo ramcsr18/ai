@@ -9,6 +9,7 @@ contract Election {
         uint256 startTime;
         uint256 endTime;
         bool isActive;
+        uint256 constituencyId;
     }
 
     struct Candidate {
@@ -38,9 +39,9 @@ contract Election {
         _;
     }
 
-    function createElection(string memory _name, uint256 _start, uint256 _end) external onlyAdmin returns (uint256) {
+    function createElection(string memory _name, uint256 _start, uint256 _end, uint256 _constituencyId) external onlyAdmin returns (uint256) {
         electionCount++;
-        elections[electionCount] = ElectionInfo(_name, _start, _end, true);
+        elections[electionCount] = ElectionInfo(_name, _start, _end, true, _constituencyId);
         emit ElectionCreated(electionCount, _name);
         return electionCount;
     }
@@ -59,7 +60,7 @@ contract Election {
     ) external {
         ElectionInfo storage election = elections[_electionId];
         require(block.timestamp >= election.startTime && block.timestamp <= election.endTime, "Election is not active");
-        require(voterRegistry.isEligible(_nullifier), "Voter not eligible");
+        require(voterRegistry.isEligible(election.constituencyId, _nullifier), "Voter not eligible for this constituency");
         require(!voterRegistry.checkVoted(_nullifier), "Voter has already voted");
 
         // In a production system, we would verify the signature from the backend here

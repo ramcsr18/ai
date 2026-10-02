@@ -14,9 +14,10 @@ eVote is a secure, transparent, and scalable electronic voting system designed f
 - `VoterRegistry.sol`: Manages eligible voters and prevents double-voting using cryptographic nullifiers.
 - `Election.sol`: Handles election creation, candidate registration, and vote casting.
 - **Tooling**: Hardhat for compilation, testing, and deployment.
+- Deploy one `Election` contract instance per supported blockchain network. The backend election record stores the network `chainId`, `blockchainNetwork`, `contractAddress`, and the on-chain `blockchainId`, so overlapping elections can route to different deployments.
 
 ### 2. Backend API (`/backend`)
-- **Identity Verification**: Simulates the verification of Government IDs (EPIC/Aadhaar).
+- **Identity Verification**: Verifies Government IDs (EPIC/Aadhaar) through the configured government API connector.
 - **Voting Tokens**: Signs nullifiers to authorize voters on the blockchain without revealing their identity.
 - **Election Management**: REST API to manage and retrieve active elections and candidates.
 
@@ -25,10 +26,15 @@ eVote is a secure, transparent, and scalable electronic voting system designed f
 - **User Flow**: Identity Verification $\rightarrow$ Election Dashboard $\rightarrow$ Candidate Selection $\rightarrow$ Secure Voting.
 - **Blockchain Integration**: Interfaces with the backend and blockchain to cast votes.
 
+### 4. Client applications (`/clients`)
+- `/clients/web`: Vite React dashboard for voters, election officers, and administrators.
+- `/clients/mobile`: Expo React Native client with secure session storage and biometric confirmation.
+- Multiple elections may be active at the same time. Each election carries independent dates, constituency, network, chain ID, contract address, and on-chain election ID.
+
 ## 📦 Setup & Installation
 
 ### Prerequisites
-- Node.js (v16+)
+- Node.js (v18+)
 - MongoDB (Local or Atlas)
 - Hardhat
 - Expo Go (on mobile device)
@@ -37,7 +43,7 @@ eVote is a secure, transparent, and scalable electronic voting system designed f
 ```bash
 cd backend
 npm install
-# Configure .env with MONGODB_URI, JWT_SECRET, and PRIVATE_KEY
+# Configure .env with MONGODB_URI, JWT_SECRET, PRIVATE_KEY, and the government verification API settings from backend/.env.example
 npm run dev
 ```
 

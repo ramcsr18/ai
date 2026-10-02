@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 contract VoterRegistry {
-    mapping(bytes32 => bool) public eligibleVoters;
+    mapping(uint256 => mapping(bytes32 => bool)) public constituencyEligibility;
     mapping(bytes32 => bool) public hasVoted;
 
-    event VoterRegistered(bytes32 indexed nullifierHash);
+    event VoterRegistered(uint256 indexed constituencyId, bytes32 indexed nullifierHash);
     event VoteRecorded(bytes32 indexed nullifier);
 
     address public admin;
@@ -19,13 +19,13 @@ contract VoterRegistry {
         _;
     }
 
-    function registerEligibleVoter(bytes32 nullifierHash) external onlyAdmin {
-        eligibleVoters[nullifierHash] = true;
-        emit VoterRegistered(nullifierHash);
+    function registerEligibleVoter(uint256 _constituencyId, bytes32 nullifierHash) external onlyAdmin {
+        constituencyEligibility[_constituencyId][nullifierHash] = true;
+        emit VoterRegistered(_constituencyId, nullifierHash);
     }
 
-    function isEligible(bytes32 nullifierHash) external view returns (bool) {
-        return eligibleVoters[nullifierHash];
+    function isEligible(uint256 _constituencyId, bytes32 nullifierHash) external view returns (bool) {
+        return constituencyEligibility[_constituencyId][nullifierHash];
     }
 
     function markAsVoted(bytes32 nullifier) external {
