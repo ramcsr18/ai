@@ -1,0 +1,7 @@
+streamlit>=1.35.0
+PyPDF2>=3.0.1
+pdfminer.six>=20221105
+langchain-ollama>=0.1.0
+google-genai>=2.0.0
+pydantic>=2.0.0
+requests>=2.30.0

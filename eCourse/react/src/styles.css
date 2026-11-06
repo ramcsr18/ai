@@ -1,0 +1,25 @@
+:root{--bg:#faf8f4;--fg:#1f1d1a;--card:#fff;--mut:#6b665e;--ac:#c2410c;--bd:#e5e0d6;--ok:#15803d;--bad:#b91c1c}
+@media (prefers-color-scheme:dark){:root{--bg:#171513;--fg:#f1ede6;--card:#221f1c;--mut:#a39d92;--ac:#fb923c;--bd:#38332d;--ok:#4ade80;--bad:#f87171}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:2rem;margin:.2em 0}h1 span{color:var(--ac)}
+.s{color:var(--mut);margin-top:0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;margin:14px 0}
+button{font:600 .95rem system-ui,sans-serif;background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 15px;cursor:pointer;transition:background 0.15s ease}
+button:hover{opacity:0.9}
+button.g,.tabs button{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font:.9rem system-ui,sans-serif}
+.row input:not([type=checkbox]){padding:6px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--fg)}
+.opt{display:block;width:100%;text-align:left;margin:7px 0;background:transparent;color:var(--fg);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;font-weight:400}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent);font-weight:600}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,transparent)}
+.ex{color:var(--mut);font:.9rem system-ui,sans-serif}
+.tag{display:inline-block;font:.75rem system-ui,sans-serif;color:var(--ac);border:1px solid var(--bd);border-radius:20px;padding:2px 10px;margin:2px 4px 2px 0}
+.sc{display:grid;grid-template-columns:90px 1fr;gap:6px 12px;border-top:1px dashed var(--bd);padding:8px 0}
+.sc b{font:600 .8rem system-ui,sans-serif;color:var(--mut)}
+.video-studio{border:1px solid var(--bd);border-radius:10px;padding:16px;background:color-mix(in srgb, var(--card) 95%, transparent);margin-top:10px}
+summary{cursor:pointer;font-weight:600}
