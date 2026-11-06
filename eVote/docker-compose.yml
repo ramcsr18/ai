@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: evote-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - evote-network
+
+  backend:
+    build: ./backend
+    container_name: evote-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/evote
+      - JWT_SECRET=${JWT_SECRET}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - POLYGON_AMOY_RPC=${POLYGON_AMOY_RPC}
+    depends_on:
+      - mongodb
+    networks:
+      - evote-network
+
+  web:
+    build: ./clients/web
+    container_name: evote-web
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - evote-network
+
+networks:
+  evote-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
