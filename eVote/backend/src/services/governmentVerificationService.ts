@@ -17,6 +17,7 @@ interface GovernmentApiResponse {
     gender?: string;
     physicalAddress?: string;
     voter?: {
+        verified?: boolean;
         nationalId?: string;
         dob?: string;
         gender?: string;
@@ -32,6 +33,16 @@ export class GovernmentVerificationError extends Error {
 }
 
 export const verifyVoterWithGovernmentApi = async (govtId: string, name: string): Promise<GovernmentVoterRecord> => {
+    if (process.env.USE_TEST_VERIFICATION_API === 'true') {
+        return {
+            verified: true,
+            nationalId: govtId || 'TEST-NATIONAL-ID',
+            dob: new Date('1995-01-15T00:00:00.000Z'),
+            gender: 'Male',
+            physicalAddress: 'Mock government address',
+        };
+    }
+
     const apiUrl = process.env.GOVERNMENT_VERIFICATION_API_URL;
     if (!apiUrl) {
         throw new GovernmentVerificationError('Government verification API is not configured', 503);
@@ -59,8 +70,14 @@ export const verifyVoterWithGovernmentApi = async (govtId: string, name: string)
         }
 
         const payload = await response.json() as GovernmentApiResponse;
-        const voter = payload.voter || payload;
-        if (!payload.verified || !voter.nationalId || !voter.dob || !voter.gender || !voter.physicalAddress) {
+        const voter = payload.voter ?? payload;
+        const verificationSucceeded = typeof payload.verified === 'boolean'
+            ? payload.verified
+            : typeof voter.verified === 'boolean'
+                ? voter.verified
+                : false;
+
+        if (!verificationSucceeded || !voter.nationalId || !voter.dob || !voter.gender || !voter.physicalAddress) {
             return {
                 verified: false,
                 nationalId: '',

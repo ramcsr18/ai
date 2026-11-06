@@ -1,2 +1,4 @@
 sprint-manager/project_status_ram.csv
 sprint-manager/.deploy
+node_modules/
+.DS_Store

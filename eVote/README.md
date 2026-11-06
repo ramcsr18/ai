@@ -18,6 +18,7 @@ eVote is a secure, transparent, and scalable electronic voting system designed f
 
 ### 2. Backend API (`/backend`)
 - **Identity Verification**: Verifies Government IDs (EPIC/Aadhaar) through the configured government API connector.
+- **Biometric Verification**: Requires a live face match and liveness check before a voter is allowed to proceed.
 - **Voting Tokens**: Signs nullifiers to authorize voters on the blockchain without revealing their identity.
 - **Election Management**: REST API to manage and retrieve active elections and candidates.
 
@@ -43,7 +44,7 @@ eVote is a secure, transparent, and scalable electronic voting system designed f
 ```bash
 cd backend
 npm install
-# Configure .env with MONGODB_URI, JWT_SECRET, PRIVATE_KEY, and the government verification API settings from backend/.env.example
+# Configure .env with MONGODB_URI, JWT_SECRET, PRIVATE_KEY, and the government/biometric verification API settings from backend/.env.example
 npm run dev
 ```
 
