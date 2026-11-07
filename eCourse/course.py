@@ -470,6 +470,7 @@ class LLMCourseGenerator:
         self.provider = provider.lower()
         self.model_name = model_name
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        self.ollama_base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
         self.heuristic_fallback = SmartHeuristicCourseGenerator()
 
     def generate_full_pack(self, topics: List[Dict[str, Any]], preferences: Dict[str, bool] = None, progress_callback: Optional[callable] = None, abort_check: Optional[callable] = None) -> Dict[str, Any]:
@@ -574,7 +575,7 @@ class LLMCourseGenerator:
             preferences = {"mcq": True, "qa": True, "yt": True, "ig": True}
         try:
             from langchain_ollama import OllamaLLM
-            llm = OllamaLLM(model=self.model_name, temperature=0.3)
+            llm = OllamaLLM(model=self.model_name, base_url=self.ollama_base_url, temperature=0.3)
 
             content_text = f"### {topic['title']}\n{topic['content']}"
             prompt = self._get_base_prompt(content_text, preferences=preferences)

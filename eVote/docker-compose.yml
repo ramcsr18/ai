@@ -4,8 +4,6 @@ services:
   mongodb:
     image: mongo:latest
     container_name: evote-mongodb
-    ports:
-      - "27017:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -15,7 +13,7 @@ services:
     build: ./backend
     container_name: evote-backend
     ports:
-      - "5000:5000"
+      - "5000:5001"
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/evote
       - JWT_SECRET=${JWT_SECRET}
@@ -30,7 +28,7 @@ services:
     build: ./clients/web
     container_name: evote-web
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - backend
     networks:

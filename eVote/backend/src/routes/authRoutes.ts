@@ -1,6 +1,8 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { verifyId, verifyLiveVoter, getVotingToken, testGovernmentVerification, testBiometricVerification, getVerificationStatus } from '../controllers/authController';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { validate } from '../middleware/validate';
 
 /**
  * @openapi
@@ -9,6 +11,16 @@ import { authMiddleware } from '../middleware/authMiddleware';
  *     description: Voter authentication and verification APIs
  */
 const router = Router();
+
+const verifyIdSchema = z.object({
+    body: z.object({
+        govtId: z.string().min(1, "Government ID is required"),
+        name: z.string().min(1, "Full name is required"),
+        deviceId: z.string().optional(),
+        faceTemplate: z.string().optional(),
+        livenessResult: z.any().optional(),
+    }),
+});
 
 /**
  * @openapi
@@ -73,7 +85,7 @@ router.post('/test/biometric-verification', testBiometricVerification);
  *       400:
  *         description: Missing required fields
  */
-router.post('/verify-id', verifyId);
+router.post('/verify-id', validate(verifyIdSchema), verifyId);
 
 /**
  * @openapi

@@ -1,0 +1,13 @@
+[Unit]
+Description=eCourse Streamlit Frontend
+After=network.target ecourse-api.service
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/html/ecourse
+Environment="OLLAMA_BASE_URL=http://localhost:11434"
+ExecStart=/var/www/html/ecourse/venv/bin/streamlit run app.py --server.port 8501 --server.address 0.0.0.0 --server.baseUrlPath /ecourse
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
